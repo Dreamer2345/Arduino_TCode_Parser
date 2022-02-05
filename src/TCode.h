@@ -28,6 +28,8 @@
 
 #define TCODE_EEPROM_MEMORY_ID "TCODE"
 #define TCODE_EEPROM_MEMORY_ID_LENGTH 5
+#define TCODE_EEPROM_SIZE TCODE_CHANNEL_COUNT*TCODE_CHANNEL_TYPES*8 + TCODE_EEPROM_MEMORY_ID_LENGTH
+
 
 #ifndef TCODE_USE_EEPROM
 #define TCODE_USE_EEPROM true
@@ -55,10 +57,12 @@ class TCode{
     void AxisWrite(String ID,int magnitude,char ext, long extMagnitude); // Function to set an axis
     unsigned long AxisLastT(String ID); // Function to query when an axis was last commanded
     void AxisRegister(String ID,String Name); // Function to name and activate axis
-    void Stop();
+    void Stop(); //Function stops all outputs
 
     void SetMessageCallback(TCODE_FUNCTION_PTR_T function); //Function to set the used message callback this can be used to change the method of message transmition (if NULL is passed to this function the default callback will be used)
     void SendMessage(String s); //Function which calls the callback (the default callback for TCode is Serial communication)
+
+    void Init(); //Initalizes the EEPROM and checks for the magic string
     
   private:
     String versionID;
@@ -78,7 +82,7 @@ class TCode{
     bool isnumber(char c); //Function which returns true if a char is a numerical
     String getNextIntStr(String input,int& index); //Function which goes through a string at an index and finds the first integer string returning it
     char getCurrentChar(String input,int index); //Function which gets a char at a location and returns '\0' if over/underflow
-    bool extentionValid(char c); //Checks if a char is a valid extention char
+    bool extentionValid(char c); //Function checks if a char is a valid extention char
 
     void executeString(String input); // Function to divide up and execute input string
     void readCommand(String command); // Function to process the individual commands

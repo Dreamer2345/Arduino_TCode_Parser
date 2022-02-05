@@ -34,35 +34,36 @@ ChannelID TCode::getIDFromStr(String input){
 }
 
 TCode::TCode(String firmware){
+  bufferString = "";
   firmwareID = firmware;
   versionID = CURRENT_TCODE_VERSION;
   Stop();
   SetMessageCallback(NULL);
-  if(!checkMemoryKey() && TCODE_USE_EEPROM){
-    placeMemoryKey();
-    resetMemory();  
-  }
 }
 
 TCode::TCode(String firmware,String TCode_version){
+  bufferString = "";
   firmwareID = firmware;
   versionID = TCode_version;
   Stop();
   SetMessageCallback(NULL);
+}
+
+
+void TCode::Init(){
+  EEPROM.begin(TCODE_EEPROM_SIZE);
   if(!checkMemoryKey() && TCODE_USE_EEPROM){
     placeMemoryKey();
     resetMemory();  
   }
 }
 
-
 void TCode::InputByte(byte input){
-  InputChar((char)input);
+  InputChar(((char)input));
 }
 
 void TCode::InputChar(char input){
-  bufferString += toupper(input);  // Add new character to string
-  
+  bufferString += String((char)toupper(input));  // Add new character to string
   if (input == '\n') {  // Execute string on newline
     bufferString.trim();  // Remove spaces, etc, from buffer
     executeString(bufferString); // Execute string
@@ -72,7 +73,7 @@ void TCode::InputChar(char input){
 
 void TCode::InputString(String input){
   input.toUpperCase();
-  bufferString = input;
+  bufferString = input + String('\n');
   bufferString.trim();  
   executeString(bufferString);
   bufferString = "";
@@ -256,9 +257,9 @@ void TCode::Stop(){
 void TCode::deviceCommand(String input){
   input = input.substring(1);
   switch(input.charAt(0)){
-    case 'S':Stop(); break;
-    case '0': SendMessage(firmwareID+'\n');
-    case '1': SendMessage(versionID+'\n');
+    case 'S':Stop(); break; 
+    case '0': SendMessage(firmwareID+'\n'); break;
+    case '1': SendMessage(versionID+'\n'); break;
     case '2':
       for (int i = 0; i < 10; i++) { axisRow("L" + String(i), Linear[i].axisName); }
       for (int i = 0; i < 10; i++) { axisRow("R" + String(i), Rotation[i].axisName); }
@@ -278,21 +279,24 @@ bool TCode::checkMemoryKey(){
 
 void TCode::placeMemoryKey(){
   EEPROM.put(TCODE_EEPROM_MEMORY_OFFSET,TCODE_EEPROM_MEMORY_ID);
+  EEPROM.commit();
 }
 
 void TCode::resetMemory(){
   int headerEnd = getHeaderEnd();
   for(int j = 0; j < TCODE_CHANNEL_TYPES; j++){  
     for(int i = 0; i < TCODE_CHANNEL_COUNT; i++){
-      int memloc = ((sizeof(int)*2)*TCODE_CHANNEL_COUNT*j)+((sizeof(int)*2)*i) + headerEnd;
-      EEPROM.put(memloc,(int)0);
-      EEPROM.put(memloc+sizeof(int),(int)0);
+      int memloc = ((sizeof(int)*2)*TCODE_CHANNEL_COUNT*j)+((sizeof(int)*2)*i) + headerEnd;      
+      EEPROM.put(memloc,((int)0));
+      EEPROM.commit();
+      EEPROM.put(memloc+sizeof(int),((int)0));
+      EEPROM.commit();
     }
   }
 }
 
 int TCode::getHeaderEnd(){
-  return TCODE_EEPROM_MEMORY_OFFSET + TCODE_EEPROM_MEMORY_ID_LENGTH + 1;
+  return TCODE_EEPROM_MEMORY_OFFSET + TCODE_EEPROM_MEMORY_ID_LENGTH;
 }
 
 int TCode::getMemoryLocation(String id){
@@ -310,8 +314,6 @@ int TCode::getMemoryLocation(String id){
     int typebyteoffset = (sizeof(int)*2)*TCODE_CHANNEL_COUNT*typeoffset;
     int entrybyteoffset = (sizeof(int)*2)*decoded_id.channel;
     memloc = typebyteoffset + entrybyteoffset + getHeaderEnd();
-    if(memloc > EEPROM.length())
-      return -3;
   }
   return memloc;
 }
@@ -323,9 +325,11 @@ void TCode::updateSavedMemory(String id,int low,int high){
     if(memloc >= 0){
       low = constrain(low,0,9999);
       high = constrain(high,0,9999); 
-      EEPROM.put(memloc,low);   
+      EEPROM.put(memloc,low); 
+      EEPROM.commit();  
       memloc += sizeof(int); 
       EEPROM.put(memloc,high);  
+      EEPROM.commit();
     }
   }
 }
@@ -337,17 +341,10 @@ void TCode::axisRow(String id,String axisName){
       int low, high;
       EEPROM.get(memloc,low); 
       memloc += sizeof(int); 
-      EEPROM.get(memloc,high); 
+      EEPROM.get(memloc,high);
       low = constrain(low,0,9999);
       high = constrain(high,0,9999);
-      SendMessage(id);
-      SendMessage(" ");
-      SendMessage(String(low));
-      SendMessage(" ");
-      SendMessage(String(high));
-      SendMessage(" ");
-      SendMessage(axisName);
-      SendMessage("\n");
+      SendMessage(id+" "+String(low)+" "+String(high)+" "+axisName+"\n");
     } 
   }
 }

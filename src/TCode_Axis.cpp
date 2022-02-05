@@ -14,7 +14,7 @@
 // Constructor for Axis Class
 Axis::Axis(){
     rampStartTime = 0;
-    rampStart = 5000;
+    rampStart = TCODE_DEFAULT_AXIS_RETURN_VALUE;
     rampStopTime = rampStart;
     rampStop = rampStart;
     axisName = "";
