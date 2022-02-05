@@ -1,3 +1,17 @@
+// TCode-Class-CPP v1.0,
+// protocal by TempestMAx (https://www.patreon.com/tempestvr)
+// implemented by Eve 05/02/2022
+// usage of this class can be found at (https://github.com/Dreamer2345/Arduino_TCode_Parser)
+// Please copy, share, learn, innovate, give attribution.
+// Decodes T-code commands
+// It can handle:
+//   10x linear channels (L0, L1, L2... L9)
+//   10x rotation channels (R0, R1, R2... L9) 
+//   10x vibration channels (V0, V1, V2... V9)
+//   10x auxilliary channels (A0, A1, A2... A9)
+// History:
+// 
+
 #ifndef TCODE_CPP
 #define TCODE_CPP
 #include "TCode.h"
