@@ -8,7 +8,20 @@ this is made to simplify the creation of projects using the TCode Protocol docum
 protocol made by tempest [found here](https://www.patreon.com/tempestvr/posts?filters[tag]=Dev%20Blog)
 
 ---
-## TCode Class Methods
+## TCode Class 
+### Constructors
+>```cpp
+>TCode(String firmware);
+>```
+>>This Constructor Sets the internal firmware string which is returned by passing the command `D0` to the class the TCode Version is set to the default value specified by `#define CURRENT_TCODE_VERSION` this value is returned by passing the command `D1`.
+
+>```cpp
+>TCode(String firmware,String TCode_version);
+>```
+>>This Constructor Sets the internal firmware string which is returned by passing the command `D0`. this constructor also allows for the setting of the TCode Version which is returned by passing the command `D1`.
+
+
+### Methods
 >```cpp
 >static ChannelID getIDFromStr(String input);
 >```
@@ -68,7 +81,3 @@ protocol made by tempest [found here](https://www.patreon.com/tempestvr/posts?fi
 >void Init();
 >```
 >>This function checks the EEPROM for the magic key at the location defined by `#define TCODE_EEPROM_MEMORY_OFFSET` if it is not found then it is placed this only occurs if '#define TCODE_USE_EEPROM true' is true 
-
----
-
-
