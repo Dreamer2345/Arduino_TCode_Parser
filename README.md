@@ -82,9 +82,10 @@ protocol made by tempest [found here](https://www.patreon.com/tempestvr/posts?fi
 >```
 >>This function checks the EEPROM for the magic key at the location defined by `#define TCODE_EEPROM_MEMORY_OFFSET` if it is not found then it is placed this only occurs if '#define TCODE_USE_EEPROM true' is true 
 
-[Link to the source for this documention on "T-Code"](https://stpihkal.docs.buttplug.io/protocols/tcode.html#introduction)
-# Toy code ("T-code")
+---
 
+# Toy code ("T-code")
+[Link to the source for this documention on "T-Code"](https://stpihkal.docs.buttplug.io/protocols/tcode.html#introduction)
 Version 0.3, as of 10th May 2021
 
 Created by [Tempest For the OSR-2, SR-6, and other DIY toys](https://patreon.com/tempestvr)
