@@ -55,7 +55,7 @@ protocol made by tempest [found here](https://www.patreon.com/tempestvr/posts?fi
 >```cpp
 >unsigned long AxisLastT(String ID);
 >```
->>>This Function returns the last time value of the string ID which is stored in the Axis. the last time is the time at which the AxisWrite function was used for that Axis. 
+>>This Function returns the last time value of the string ID which is stored in the Axis. the last time is the time at which the AxisWrite function was used for that Axis. 
 
 >```cpp
 >void AxisRegister(String ID,String Name);
