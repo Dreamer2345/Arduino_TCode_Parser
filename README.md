@@ -163,8 +163,6 @@ Rotations in three axes:
 
 The minimum position for each axis is 0, the maximum position is 0.9999 (etc). The middle, or neutral, position is 0.5.
 
-![TCode Axes Diagram](./tcode-axes.png)
-
 Extra functions on the OSR2/SR6:
 * V0, V1, are vibration motor control channels
 * A0 is direct control of the valve position 
