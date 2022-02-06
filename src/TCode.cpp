@@ -50,13 +50,6 @@ TCode::TCode(String firmware,String TCode_version){
 }
 
 
-void TCode::Init(){
-  EEPROM.begin(TCODE_EEPROM_SIZE);
-  if(!checkMemoryKey() && TCODE_USE_EEPROM){
-    placeMemoryKey();
-    resetMemory();  
-  }
-}
 
 void TCode::InputByte(byte input){
   InputChar(((char)input));
@@ -270,31 +263,6 @@ void TCode::deviceCommand(String input){
 
 }
 
-bool TCode::checkMemoryKey(){
-  char b[TCODE_EEPROM_MEMORY_ID_LENGTH];
-  for(int i = 0; i < TCODE_EEPROM_MEMORY_ID_LENGTH; i++)
-    b[i] = (char)EEPROM.read(TCODE_EEPROM_MEMORY_OFFSET+i);
-  return(String(b) == String(TCODE_EEPROM_MEMORY_ID));
-}
-
-void TCode::placeMemoryKey(){
-  EEPROM.put(TCODE_EEPROM_MEMORY_OFFSET,TCODE_EEPROM_MEMORY_ID);
-  EEPROM.commit();
-}
-
-void TCode::resetMemory(){
-  int headerEnd = getHeaderEnd();
-  for(int j = 0; j < TCODE_CHANNEL_TYPES; j++){  
-    for(int i = 0; i < TCODE_CHANNEL_COUNT; i++){
-      int memloc = ((sizeof(int)*2)*TCODE_CHANNEL_COUNT*j)+((sizeof(int)*2)*i) + headerEnd;      
-      EEPROM.put(memloc,((int)0));
-      EEPROM.commit();
-      EEPROM.put(memloc+sizeof(int),((int)0));
-      EEPROM.commit();
-    }
-  }
-}
-
 int TCode::getHeaderEnd(){
   return TCODE_EEPROM_MEMORY_OFFSET + TCODE_EEPROM_MEMORY_ID_LENGTH;
 }
@@ -318,6 +286,28 @@ int TCode::getMemoryLocation(String id){
   return memloc;
 }
 
+bool TCode::checkMemoryKey(){
+  char b[TCODE_EEPROM_MEMORY_ID_LENGTH];
+  for(int i = 0; i < TCODE_EEPROM_MEMORY_ID_LENGTH; i++)
+    b[i] = (char)readEEPROM(TCODE_EEPROM_MEMORY_OFFSET+i);
+  return(String(b) == String(TCODE_EEPROM_MEMORY_ID));
+}
+
+void TCode::placeMemoryKey(){
+  putEEPROM(TCODE_EEPROM_MEMORY_OFFSET,TCODE_EEPROM_MEMORY_ID);
+}
+
+void TCode::resetMemory(){
+  int headerEnd = getHeaderEnd();
+  for(int j = 0; j < TCODE_CHANNEL_TYPES; j++){  
+    for(int i = 0; i < TCODE_CHANNEL_COUNT; i++){
+      int memloc = ((sizeof(int)*2)*TCODE_CHANNEL_COUNT*j)+((sizeof(int)*2)*i) + headerEnd;      
+      putEEPROM(memloc,((int)0));
+      putEEPROM(memloc+sizeof(int),((int)0));
+    }
+  }
+}
+
 void TCode::updateSavedMemory(String id,int low,int high){
   ChannelID decoded_id = getIDFromStr(id);
   if(decoded_id.valid){
@@ -325,11 +315,9 @@ void TCode::updateSavedMemory(String id,int low,int high){
     if(memloc >= 0){
       low = constrain(low,0,9999);
       high = constrain(high,0,9999); 
-      EEPROM.put(memloc,low); 
-      EEPROM.commit();  
+      putEEPROM(memloc,low); 
       memloc += sizeof(int); 
-      EEPROM.put(memloc,high);  
-      EEPROM.commit();
+      putEEPROM(memloc,high);  
     }
   }
 }
@@ -339,9 +327,9 @@ void TCode::axisRow(String id,String axisName){
     int memloc = getMemoryLocation(id);
     if(memloc >= 0){
       int low, high;
-      EEPROM.get(memloc,low); 
+      getEEPROM(memloc,low); 
       memloc += sizeof(int); 
-      EEPROM.get(memloc,high);
+      getEEPROM(memloc,high);
       low = constrain(low,0,9999);
       high = constrain(high,0,9999);
       SendMessage(id+" "+String(low)+" "+String(high)+" "+axisName+"\n");
@@ -404,7 +392,57 @@ void TCode::SendMessage(String s){
     message_callback(s);
 }
 
-
+//PER BOARD CODE AREA
+#ifdef ARDUINO_ESP32_DEV
+  void TCode::Init(){
+    EEPROM.begin(TCODE_EEPROM_SIZE);
+    if(!checkMemoryKey() && TCODE_USE_EEPROM){
+      placeMemoryKey();
+      resetMemory();  
+    }
+  }
+  
+  byte TCode::readEEPROM(int idx){
+    return EEPROM.read(idx);
+  }
+  
+  void TCode::writeEEPROM(int idx,byte b){
+    EEPROM.write(idx,b); 
+    EEPROM.commit();   
+  }
+  
+  template< typename T > T &TCode::getEEPROM( int idx, T &t ){
+    return EEPROM.get(idx,t);  
+  }
+  
+  template< typename T > void TCode::putEEPROM( int idx, T t ){
+    EEPROM.put(idx,t);
+    EEPROM.commit();
+  }
+#else //Uses the default arduino methods for setting EEPROM
+  void TCode::Init(){
+    if(!checkMemoryKey() && TCODE_USE_EEPROM){
+      placeMemoryKey();
+      resetMemory();  
+    }
+  }
+  
+  byte TCode::readEEPROM(int idx){
+    return EEPROM.read(idx);
+  }
+  
+  void TCode::writeEEPROM(int idx,byte b){
+    EEPROM.write(idx,b);  
+  }
+  
+  template< typename T > T &TCode::getEEPROM( int idx, T &t ){
+    return EEPROM.get(idx,t);  
+  }
+  
+  template< typename T > void TCode::putEEPROM( int idx, T t ){
+    EEPROM.put(idx,t);
+  }
+#endif
 
 
 #endif

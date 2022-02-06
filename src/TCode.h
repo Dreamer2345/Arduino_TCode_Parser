@@ -62,6 +62,9 @@ class TCode{
     void SetMessageCallback(TCODE_FUNCTION_PTR_T function); //Function to set the used message callback this can be used to change the method of message transmition (if NULL is passed to this function the default callback will be used)
     void SendMessage(String s); //Function which calls the callback (the default callback for TCode is Serial communication)
 
+
+    
+    
     void Init(); //Initalizes the EEPROM and checks for the magic string
     
   private:
@@ -96,6 +99,11 @@ class TCode{
     int getHeaderEnd(); //Function to get the memory location of the start of the stored values area
     int getMemoryLocation(String id); //Function to get the memory location of an ID
     void updateSavedMemory(String id,int low, int high); //Function to update the memory location of an id
+
+    byte readEEPROM(int idx); //Function abstracts the EEPROM read command so that it can be redefined if need be for different board types
+    void writeEEPROM(int idx,byte b); //Function abstracts the EEPROM write command so that it can be redefined if need be for different board types
+    template< typename T > T &getEEPROM( int idx, T &t ); //Function abstracts the EEPROM get command so that it can be redefined if need be for different board types
+    template< typename T > void putEEPROM( int idx, T t ); //Function abstracts the EEPROM put command so that it can be redefined if need be for different board types
 };
 
 
