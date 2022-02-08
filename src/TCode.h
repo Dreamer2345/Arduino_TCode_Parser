@@ -50,31 +50,30 @@ class TCode{
     TCode(String firmware); // Constructor for class using defined TCode Version number
     TCode(String firmware,String TCode_version); // Constructor for class using user defined TCode Version number
     static ChannelID getIDFromStr(String input); // Function to convert string ID to a channel ID Type and if it is valid
-    void InputByte(byte input); // Function to read off individual byte as input to the command buffer
-    void InputChar(char input); // Function to read off individual char as input to the command buffer
-    void InputString(String input); // Function to take in a string as input to the command buffer
-    int AxisRead(String ID); // Function to read the current position of an axis
-    void AxisWrite(String ID,int magnitude,char ext, long extMagnitude); // Function to set an axis
-    unsigned long AxisLastT(String ID); // Function to query when an axis was last commanded
-    void AxisRegister(String ID,String Name); // Function to name and activate axis
-    void Stop(); //Function stops all outputs
+    void inputByte(byte input); // Function to read off individual byte as input to the command buffer
+    void inputChar(char input); // Function to read off individual char as input to the command buffer
+    void inputString(String input); // Function to take in a string as input to the command buffer
+    int axisRead(String ID); // Function to read the current position of an axis
+    void axisWrite(String ID,int magnitude,char ext, long extMagnitude); // Function to set an axis
+    unsigned long axisLastT(String ID); // Function to query when an axis was last commanded
+    void axisRegister(String ID,String Name); // Function to name and activate axis
+	bool axisChanged(String ID); //Function to check if an axis has changed
+	
+    void stop(); //Function stops all outputs
 
-    void SetMessageCallback(TCODE_FUNCTION_PTR_T function); //Function to set the used message callback this can be used to change the method of message transmition (if NULL is passed to this function the default callback will be used)
-    void SendMessage(String s); //Function which calls the callback (the default callback for TCode is Serial communication)
+    void setMessageCallback(TCODE_FUNCTION_PTR_T function); //Function to set the used message callback this can be used to change the method of message transmition (if NULL is passed to this function the default callback will be used)
+    void sendMessage(String s); //Function which calls the callback (the default callback for TCode is Serial communication)
 
-
-    
-    
-    void Init(); //Initalizes the EEPROM and checks for the magic string
+    void init(); //Initalizes the EEPROM and checks for the magic string
     
   private:
     String versionID;
     String firmwareID;
     String bufferString;
-    Axis Linear[TCODE_CHANNEL_COUNT];
-    Axis Rotation[TCODE_CHANNEL_COUNT];
-    Axis Vibration[TCODE_CHANNEL_COUNT];
-    Axis Auxiliary[TCODE_CHANNEL_COUNT];
+    TCodeAxis Linear[TCODE_CHANNEL_COUNT];
+    TCodeAxis Rotation[TCODE_CHANNEL_COUNT];
+    TCodeAxis Vibration[TCODE_CHANNEL_COUNT];
+    TCodeAxis Auxiliary[TCODE_CHANNEL_COUNT];
 
     TCODE_FUNCTION_PTR_T message_callback;
 

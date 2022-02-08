@@ -17,6 +17,39 @@
 #include "TCode.h"
 
 
+
+
+TCode::TCode(String firmware){
+  bufferString = "";
+  firmwareID = firmware;
+  versionID = CURRENT_TCODE_VERSION;
+  stop();
+  setMessageCallback(NULL);
+}
+
+TCode::TCode(String firmware,String TCode_version){
+  bufferString = "";
+  firmwareID = firmware;
+  versionID = TCode_version;
+  stop();
+  setMessageCallback(NULL);
+}
+
+
+bool TCode::axisChanged(String ID){
+  ChannelID decoded_id = TCode::getIDFromStr(ID);
+  if (decoded_id.valid) {
+    switch(decoded_id.type) {
+      // Axis commands
+      case 'L': return Linear[decoded_id.channel].changed();
+      case 'R': return Rotation[decoded_id.channel].changed();
+      case 'V': return Vibration[decoded_id.channel].changed(); 
+      case 'A': return Auxiliary[decoded_id.channel].changed(); 
+    }
+  }
+  return false;
+}
+
 ChannelID TCode::getIDFromStr(String input){
   char type = input.charAt(0);
   int channel = input.charAt(1) - '0';
@@ -33,29 +66,11 @@ ChannelID TCode::getIDFromStr(String input){
   return {type,channel,valid};
 }
 
-TCode::TCode(String firmware){
-  bufferString = "";
-  firmwareID = firmware;
-  versionID = CURRENT_TCODE_VERSION;
-  Stop();
-  SetMessageCallback(NULL);
+void TCode::inputByte(byte input){
+  inputChar(((char)input));
 }
 
-TCode::TCode(String firmware,String TCode_version){
-  bufferString = "";
-  firmwareID = firmware;
-  versionID = TCode_version;
-  Stop();
-  SetMessageCallback(NULL);
-}
-
-
-
-void TCode::InputByte(byte input){
-  InputChar(((char)input));
-}
-
-void TCode::InputChar(char input){
+void TCode::inputChar(char input){
   bufferString += String((char)toupper(input));  // Add new character to string
   if (input == '\n') {  // Execute string on newline
     bufferString.trim();  // Remove spaces, etc, from buffer
@@ -64,7 +79,7 @@ void TCode::InputChar(char input){
   }
 }
 
-void TCode::InputString(String input){
+void TCode::inputString(String input){
   input.toUpperCase();
   bufferString = input + String('\n');
   bufferString.trim();  
@@ -72,35 +87,35 @@ void TCode::InputString(String input){
   bufferString = "";
 }
 
-int TCode::AxisRead(String inputID){
+int TCode::axisRead(String inputID){
   int x = TCODE_DEFAULT_AXIS_RETURN_VALUE; // This is the return variable
   ChannelID ID = TCode::getIDFromStr(inputID);
   if (ID.valid) {
     switch(ID.type) {
       // Axis commands
-      case 'L': x = Linear[ID.channel].GetPosition(); break;
-      case 'R': x = Rotation[ID.channel].GetPosition(); break;
-      case 'V': x = Vibration[ID.channel].GetPosition(); break;
-      case 'A': x = Auxiliary[ID.channel].GetPosition(); break;
+      case 'L': x = Linear[ID.channel].getPosition(); break;
+      case 'R': x = Rotation[ID.channel].getPosition(); break;
+      case 'V': x = Vibration[ID.channel].getPosition(); break;
+      case 'A': x = Auxiliary[ID.channel].getPosition(); break;
     }
   }
   return x;
 }
 
-void TCode::AxisWrite(String inputID, int magnitude, char extension, long extMagnitude){
+void TCode::axisWrite(String inputID, int magnitude, char extension, long extMagnitude){
   ChannelID ID = TCode::getIDFromStr(inputID);
   if (ID.valid) {
     switch(ID.type) {
       // Axis commands
-      case 'L': Linear[ID.channel].Set(magnitude,extension,extMagnitude); break;
-      case 'R': Rotation[ID.channel].Set(magnitude,extension,extMagnitude); break;
-      case 'V': Vibration[ID.channel].Set(magnitude,extension,extMagnitude); break;
-      case 'A': Auxiliary[ID.channel].Set(magnitude,extension,extMagnitude); break;
+      case 'L': Linear[ID.channel].set(magnitude,extension,extMagnitude); break;
+      case 'R': Rotation[ID.channel].set(magnitude,extension,extMagnitude); break;
+      case 'V': Vibration[ID.channel].set(magnitude,extension,extMagnitude); break;
+      case 'A': Auxiliary[ID.channel].set(magnitude,extension,extMagnitude); break;
     }
   }
 }
 
-unsigned long TCode::AxisLastT(String inputID){
+unsigned long TCode::axisLastT(String inputID){
   unsigned long t = 0; // Return time
   ChannelID ID = TCode::getIDFromStr(inputID);
   if(ID.valid){
@@ -115,7 +130,7 @@ unsigned long TCode::AxisLastT(String inputID){
   return t;
 }
 
-void TCode::AxisRegister(String inputID, String axisName){
+void TCode::axisRegister(String inputID, String axisName){
   ChannelID ID = TCode::getIDFromStr(inputID);
   if (ID.valid) {
     switch(ID.type) {
@@ -232,27 +247,27 @@ void TCode::axisCommand(String input){
   if (valid) {
     switch(type) {
       // Axis commands
-      case 'L': Linear[channel].Set(magnitude,extention,extMagnitude); break;
-      case 'R': Rotation[channel].Set(magnitude,extention,extMagnitude); break;
-      case 'V': Vibration[channel].Set(magnitude,extention,extMagnitude); break;
-      case 'A': Auxiliary[channel].Set(magnitude,extention,extMagnitude); break;
+      case 'L': Linear[channel].set(magnitude,extention,extMagnitude); break;
+      case 'R': Rotation[channel].set(magnitude,extention,extMagnitude); break;
+      case 'V': Vibration[channel].set(magnitude,extention,extMagnitude); break;
+      case 'A': Auxiliary[channel].set(magnitude,extention,extMagnitude); break;
     }
   }
 }
 
-void TCode::Stop(){
-  for (int i = 0; i < 10; i++) { Linear[i].Stop(); }
-  for (int i = 0; i < 10; i++) { Rotation[i].Stop(); }
-  for (int i = 0; i < 10; i++) { Vibration[i].Set(0,' ',0); }
-  for (int i = 0; i < 10; i++) { Auxiliary[i].Stop(); }  
+void TCode::stop(){
+  for (int i = 0; i < 10; i++) { Linear[i].stop(); }
+  for (int i = 0; i < 10; i++) { Rotation[i].stop(); }
+  for (int i = 0; i < 10; i++) { Vibration[i].set(0,' ',0); }
+  for (int i = 0; i < 10; i++) { Auxiliary[i].stop(); }  
 }
 
 void TCode::deviceCommand(String input){
   input = input.substring(1);
   switch(input.charAt(0)){
-    case 'S':Stop(); break; 
-    case '0': SendMessage(firmwareID+'\n'); break;
-    case '1': SendMessage(versionID+'\n'); break;
+    case 'S': stop(); break; 
+    case '0': sendMessage(firmwareID+'\n'); break;
+    case '1': sendMessage(versionID+'\n'); break;
     case '2':
       for (int i = 0; i < 10; i++) { axisRow("L" + String(i), Linear[i].axisName); }
       for (int i = 0; i < 10; i++) { axisRow("R" + String(i), Rotation[i].axisName); }
@@ -332,7 +347,7 @@ void TCode::axisRow(String id,String axisName){
       getEEPROM(memloc,high);
       low = constrain(low,0,9999);
       high = constrain(high,0,9999);
-      SendMessage(id+" "+String(low)+" "+String(high)+" "+axisName+"\n");
+      sendMessage(id+" "+String(low)+" "+String(high)+" "+axisName+"\n");
     } 
   }
 }
@@ -367,7 +382,7 @@ void TCode::setupCommand(String input){
       }
     }
     else{
-      SendMessage("EEPROM NOT IN USE\n");
+      sendMessage("EEPROM NOT IN USE\n");
     }
   }
 }
@@ -378,7 +393,7 @@ void TCode::defaultCallback(String input){
   }
 }
 
-void TCode::SetMessageCallback(TCODE_FUNCTION_PTR_T f){
+void TCode::setMessageCallback(TCODE_FUNCTION_PTR_T f){
   if(f == NULL){
     message_callback = &defaultCallback;
   }
@@ -387,14 +402,14 @@ void TCode::SetMessageCallback(TCODE_FUNCTION_PTR_T f){
   }
 }
 
-void TCode::SendMessage(String s){
+void TCode::sendMessage(String s){
   if(message_callback != NULL)
     message_callback(s);
 }
 
 //PER BOARD CODE AREA
 #ifdef ARDUINO_ESP32_DEV
-  void TCode::Init(){
+  void TCode::init(){
     EEPROM.begin(TCODE_EEPROM_SIZE);
     if(!checkMemoryKey() && TCODE_USE_EEPROM){
       placeMemoryKey();
@@ -419,8 +434,9 @@ void TCode::SendMessage(String s){
     EEPROM.put(idx,t);
     EEPROM.commit();
   }
+  
 #else //Uses the default arduino methods for setting EEPROM
-  void TCode::Init(){
+  void TCode::init(){
     if(!checkMemoryKey() && TCODE_USE_EEPROM){
       placeMemoryKey();
       resetMemory();  
