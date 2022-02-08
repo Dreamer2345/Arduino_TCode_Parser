@@ -13,15 +13,19 @@
 
 #define TCODE_DEFAULT_AXIS_RETURN_VALUE 5000;
 
-class Axis{
+class TCodeAxis{
   public:
-    Axis();
-    void Set(int x, char ext, long y); // Function to set the axis dynamic parameters
-    int GetPosition(); // Function to return the current position of this axis
-    void Stop(); // Function to stop axis movement at current position
+    TCodeAxis();
+    void set(int x, char ext, long y); // Function to set the axis dynamic parameters
+    int getPosition(); // Function to return the current position of this axis
+    void stop(); // Function to stop axis movement at current position
+	
+	bool changed(); //Function to check if an axis has changed since last getPosition
+	
     String axisName;
     unsigned long lastT;
   private:
+	int lastPosition;
     int rampStart;
     unsigned long rampStartTime;
     int rampStop;

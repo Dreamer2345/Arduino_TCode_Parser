@@ -1,0 +1,84 @@
+########################################
+#  Syntax Colouring map for TCode 
+########################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+TCode	KEYWORD1	TCode
+TCodeAxis	KEYWORD1	TCodeAxis
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+#######################################
+# TCode (KEYWORD2)
+#######################################
+
+getIDFromStr	KEYWORD2
+inputByte	KEYWORD2
+inputChar	KEYWORD2
+inputString	KEYWORD2
+axisRead	KEYWORD2
+axisWrite	KEYWORD2
+axisLastT	KEYWORD2
+axisRegister	KEYWORD2
+axisChanged	KEYWORD2
+stop	KEYWORD2
+
+setMessageCallback	KEYWORD2
+sendMessage	KEYWORD2
+
+init	KEYWORD2
+
+isnumber	KEYWORD2
+getNextIntStr	KEYWORD2
+defaultCallback	KEYWORD2
+axisRow	KEYWORD2
+
+getCurrentChar	KEYWORD2
+extentionValid	KEYWORD2
+executeString	KEYWORD2
+readCommand	KEYWORD2
+axisCommand	KEYWORD2
+deviceCommand	KEYWORD2
+setupCommand	KEYWORD2
+checkMemoryKey	KEYWORD2
+placeMemoryKey	KEYWORD2
+resetMemory	KEYWORD2
+getHeaderEnd	KEYWORD2
+getMemoryLocation	KEYWORD2
+updateSavedMemory	KEYWORD2
+readEEPROM	KEYWORD2
+writeEEPROM	KEYWORD2
+getEEPROM	KEYWORD2
+putEEPROM	KEYWORD2
+
+#######################################
+# TCodeAxis (KEYWORD2)
+#######################################
+
+set	KEYWORD2
+getPosition	KEYWORD2
+changed	KEYWORD2
+stop	KEYWORD2
+
+#######################################
+# Constants (LITERAL1)
+#######################################
+
+TCODE_CHANNEL_TYPES	LITERAL1
+TCODE_CHANNEL_COUNT	LITERAL1
+
+CURRENT_TCODE_VERSION	LITERAL1
+
+TCODE_EEPROM_MEMORY_OFFSET	LITERAL1
+TCODE_EEPROM_MEMORY_ID	LITERAL1 
+TCODE_EEPROM_MEMORY_ID	LITERAL1
+TCODE_EEPROM_SIZE	LITERAL1
+TCODE_USE_EEPROM	LITERAL1
+
+TCODE_DEFAULT_AXIS_RETURN_VALUE	LITERAL1
+
