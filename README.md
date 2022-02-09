@@ -25,7 +25,7 @@ protocol made by tempest [found here](https://www.patreon.com/tempestvr/posts?fi
 >```cpp
 >void init();
 >```
->>This function checks the EEPROM for the magic key at the location defined by `#define TCODE_EEPROM_MEMORY_OFFSET` if it is not found then it is placed this only occurs if '#define TCODE_USE_EEPROM true' is true 
+>>This function checks the EEPROM for the magic key at the location defined by `#define TCODE_EEPROM_MEMORY_OFFSET` if it is not found then it is placed this only occurs if `#define TCODE_USE_EEPROM true` is true 
 
 >```cpp
 >void stop();

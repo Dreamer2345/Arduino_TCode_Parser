@@ -57,8 +57,9 @@ class TCode{
     void axisWrite(String ID,int magnitude,char ext, long extMagnitude); // Function to set an axis
     unsigned long axisLastT(String ID); // Function to query when an axis was last commanded
     void axisRegister(String ID,String Name); // Function to name and activate axis
-	bool axisChanged(String ID); //Function to check if an axis has changed
-	void axisEasingType(String ID, EasingType e); //Function to set the easing type of an axis;
+	  bool axisChanged(String ID); //Function to check if an axis has changed
+	  void axisEasingType(String ID, EasingType e); //Function to set the easing type of an axis;
+
 	
     void stop(); //Function stops all outputs
 
