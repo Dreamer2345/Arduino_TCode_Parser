@@ -13,6 +13,10 @@
 
 #define TCODE_DEFAULT_AXIS_RETURN_VALUE 5000;
 
+enum class EasingType{
+	LINEAR,EASEIN,EASEOUT,EASEINOUT,
+};
+
 class TCodeAxis{
   public:
     TCodeAxis();
@@ -22,8 +26,11 @@ class TCodeAxis{
 	
 	bool changed(); //Function to check if an axis has changed since last getPosition
 	
+	void setEasingType(EasingType e); //Function to set the easing type for get position
+	
     String axisName;
     unsigned long lastT;
+	EasingType easing;
   private:
 	int lastPosition;
     int rampStart;

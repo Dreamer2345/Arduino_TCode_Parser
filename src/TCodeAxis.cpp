@@ -9,16 +9,77 @@
 
 #ifndef TCODE_AXIS_CPP
 #define TCODE_AXIS_CPP
-#include "TCode_Axis.h"
+#include "TCodeAxis.h"
+
+
+
+float lerp(float start, float stop, float t){
+	t = constrain(t,0.0,1.0);
+	return (((1-t) * start)+(t * stop));
+}
+
+float easeIn(float t,float e){
+	t = constrain(t,0.0,1.0);
+	return (float)pow(t,e);
+}
+
+float easeOut(float t, float e){
+	t = constrain(t,0.0,1.0);
+	return 1.0 - pow(1-t,e);
+}
+
+/*
+float slerp(float start, float end, float t, float e){
+	float tval = lerp(easeIn(t,e),easeOut(t,e),t);
+	tval = constrain(tval,0.0,1.0);
+	return lerp(start,end,tval);
+}
+*/
+
+int mapEaseIn(int in, int inStart, int inEnd, int outStart, int outEnd){
+	float t = in - inStart;
+	t /= (inEnd - inStart);
+	t = easeIn(t,2.0);
+	t = constrain(t,0.0,1.0);
+	t *= (outEnd - outStart);
+	t += outStart;
+	return (int)t;
+}
+
+int mapEaseOut(int in, int inStart, int inEnd, int outStart, int outEnd){
+	float t = in - inStart;
+	t /= (inEnd - inStart);
+	t = easeOut(t,2.0);
+	t = constrain(t,0.0,1.0);
+	t *= (outEnd - outStart);
+	t += outStart;
+	return (int)t;
+}
+
+int mapEaseInOut(int in, int inStart, int inEnd, int outStart, int outEnd){
+	float t = in - inStart;
+	t /= (inEnd - inStart);
+	t = lerp(easeIn(t,2.0),easeOut(t,2.0),t);
+	t = constrain(t,0.0,1.0);
+	t *= (outEnd - outStart);
+	t += outStart;
+	return (int)t;
+}
+
 
 // Constructor for Axis Class
 TCodeAxis::TCodeAxis(){
+	easing = EasingType::LINEAR;
     rampStartTime = 0;
     rampStart = TCODE_DEFAULT_AXIS_RETURN_VALUE;
     rampStopTime = rampStart;
     rampStop = rampStart;
     axisName = "";
     lastT = 0;
+}
+
+void TCodeAxis::setEasingType(EasingType e){
+	easing = e;
 }
 
 // Function to set the axis dynamic parameters
@@ -58,7 +119,14 @@ int TCodeAxis::getPosition() {
   if (t > rampStopTime) {
     x = rampStop;
   } else if (t > rampStartTime) { 
-    x = map(t,rampStartTime,rampStopTime,rampStart,rampStop);
+	switch(easing){
+	  case EasingType::LINEAR: x = map(t,rampStartTime,rampStopTime,rampStart,rampStop); break;
+	  case EasingType::EASEIN: x = mapEaseIn(t,rampStartTime,rampStopTime,rampStart,rampStop); break;
+	  case EasingType::EASEOUT: x = mapEaseOut(t,rampStartTime,rampStopTime,rampStart,rampStop); break;
+	  case EasingType::EASEINOUT: x = mapEaseInOut(t,rampStartTime,rampStopTime,rampStart,rampStop); break;
+	  default: x = map(t,rampStartTime,rampStopTime,rampStart,rampStop);
+	}
+    
   } else {
     x = rampStart;
   }

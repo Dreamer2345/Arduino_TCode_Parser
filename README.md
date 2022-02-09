@@ -73,6 +73,11 @@ protocol made by tempest [found here](https://www.patreon.com/tempestvr/posts?fi
 >>This Function returns if the axis has changed since last check returns true if it has changed. 
 
 >```cpp
+>bool axisEasingType(String ID, EasingType e);
+>```
+>>This Function sets the easing type of an axis this can be Linear, EaseIn, EaseOut and EaseInOut which controls how the time curve effects the position back
+
+>```cpp
 >void setMessageCallback(TCODE_FUNCTION_PTR_T function);
 >```
 >>This function sets the send message callback this can be used to change the method of how the microcontroller talks to the outside world by default it uses Arduino Serial communication. if a null pointer is passed into this function then the default message callback is used.

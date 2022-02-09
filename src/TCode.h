@@ -16,7 +16,7 @@
 #define TCODE_H
 #include "Arduino.h"
 #include <EEPROM.h>
-#include "TCode_Axis.h"
+#include "TCodeAxis.h"
 
 #define TCODE_CHANNEL_TYPES 4
 #define TCODE_CHANNEL_COUNT 10
@@ -58,6 +58,7 @@ class TCode{
     unsigned long axisLastT(String ID); // Function to query when an axis was last commanded
     void axisRegister(String ID,String Name); // Function to name and activate axis
 	bool axisChanged(String ID); //Function to check if an axis has changed
+	void axisEasingType(String ID, EasingType e); //Function to set the easing type of an axis;
 	
     void stop(); //Function stops all outputs
 

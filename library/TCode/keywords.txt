@@ -26,6 +26,7 @@ axisWrite	KEYWORD2
 axisLastT	KEYWORD2
 axisRegister	KEYWORD2
 axisChanged	KEYWORD2
+axisEasingType	KEYWORD2
 stop	KEYWORD2
 
 setMessageCallback	KEYWORD2
@@ -61,6 +62,7 @@ putEEPROM	KEYWORD2
 #######################################
 
 set	KEYWORD2
+setEasingType	KEYWORD2
 getPosition	KEYWORD2
 changed	KEYWORD2
 stop	KEYWORD2
