@@ -69,7 +69,7 @@ int mapEaseInOut(int in, int inStart, int inEnd, int outStart, int outEnd){
 
 // Constructor for Axis Class
 TCodeAxis::TCodeAxis(){
-	easing = EasingType::LINEAR;
+    easing = EasingType::LINEAR;
     rampStartTime = 0;
     rampStart = TCODE_DEFAULT_AXIS_RETURN_VALUE;
     rampStopTime = rampStart;
@@ -79,7 +79,7 @@ TCodeAxis::TCodeAxis(){
 }
 
 void TCodeAxis::setEasingType(EasingType e){
-	easing = e;
+    easing = e;
 }
 
 // Function to set the axis dynamic parameters
