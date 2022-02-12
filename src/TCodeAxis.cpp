@@ -30,7 +30,7 @@ float easeOut(float t, float e){
 
 /*
 float slerp(float start, float end, float t, float e){
-    float tval = lerp(easeIn(t,e),easeOut(t,e),t);
+    float tval = lerp(easeIn(t,e),easeOut(t,e),0.5f);
     tval = constrain(tval,0.0,1.0);
     return lerp(start,end,tval);
 }
