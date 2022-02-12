@@ -59,7 +59,7 @@ int mapEaseOut(int in, int inStart, int inEnd, int outStart, int outEnd){
 int mapEaseInOut(int in, int inStart, int inEnd, int outStart, int outEnd){
     float t = in - inStart;
     t /= (inEnd - inStart);
-    t = lerp(easeIn(t,2.0),easeOut(t,2.0),t);
+    t = lerp(easeIn(t,2.0),easeOut(t,2.0),0.5f);
     t = constrain(t,0.0,1.0);
     t *= (outEnd - outStart);
     t += outStart;
