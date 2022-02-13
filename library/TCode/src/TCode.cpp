@@ -258,37 +258,24 @@ void TCode::axisCommand(String input){
     extention = ' ';  
   }
   
-  String RampType = "";
+  EasingType RampType = EasingType::LINEAR;
   if(extention != ' '){
-    RampType = input.substring(Index,input.length()-1);
+    char first = getCurrentChar(input,Index++);
+    char second = getCurrentChar(input,Index++);
+    switch(first){
+      case '<': if(second == '>') RampType = EasingType::EASEINOUT; else RampType = EasingType::EASEIN; break;
+      case '>': EasingType::EASEOUT;
+    }
   }
   
   if (valid) {
     switch(type) {
       // Axis commands
-      case 'L': Linear[channel].set(magnitude,extention,extMagnitude); break;
-      case 'R': Rotation[channel].set(magnitude,extention,extMagnitude); break;
-      case 'V': Vibration[channel].set(magnitude,extention,extMagnitude); break;
-      case 'A': Auxiliary[channel].set(magnitude,extention,extMagnitude); break;
-    }
-    
-    if(RampType != ""){
-      EasingType e = EasingType::LINEAR;
-      if(RampType == "<")
-        e = EasingType::EaseIn;
-      else if(RampType == ">")
-        e = EasingType::EaseOut;
-      else if(RampType == "<>")
-        e = EasingType::EaseInOut;
-      
-      switch(type) {
-        // Axis commands
-        case 'L': Linear[channel].setEasingType(e); break;
-        case 'R': Rotation[channel].setEasingType(e); break;
-        case 'V': Vibration[channel].setEasingType(e); break;
-        case 'A': Auxiliary[channel].setEasingType(e); break;
-      }
-    }
+      case 'L': Linear[channel].set(magnitude,extention,extMagnitude);    Linear[channel].setEasingType(e);     break;
+      case 'R': Rotation[channel].set(magnitude,extention,extMagnitude);  Rotation[channel].setEasingType(e);   break;
+      case 'V': Vibration[channel].set(magnitude,extention,extMagnitude); Vibration[channel].setEasingType(e);  break;
+      case 'A': Auxiliary[channel].set(magnitude,extention,extMagnitude); Auxiliary[channel].setEasingType(e);  break;
+    }    
   }
 }
 
