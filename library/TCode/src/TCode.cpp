@@ -261,9 +261,9 @@ void TCode::axisCommand(String input){
   EasingType RampType = EasingType::LINEAR;
   if(extention != ' '){
     char first = getCurrentChar(input,Index++);
-    char second = getCurrentChar(input,Index++);
+    char second = getCurrentChar(input,Index);
     switch(first){
-      case '<': if(second == '>') RampType = EasingType::EASEINOUT; else RampType = EasingType::EASEIN; break;
+      case '<': if(second == '>'){ RampType = EasingType::EASEINOUT; Index++;} else { RampType = EasingType::EASEIN; } break;
       case '>': EasingType::EASEOUT;
     }
   }
