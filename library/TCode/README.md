@@ -25,7 +25,7 @@ protocol made by tempest [found here](https://www.patreon.com/tempestvr/posts?fi
 >```cpp
 >void init();
 >```
->>This function checks the EEPROM for the magic key at the location defined by `#define TCODE_EEPROM_MEMORY_OFFSET` if it is not found then it is placed this only occurs if '#define TCODE_USE_EEPROM true' is true 
+>>This function checks the EEPROM for the magic key at the location defined by `#define TCODE_EEPROM_MEMORY_OFFSET` if it is not found then it is placed this only occurs if `#define TCODE_USE_EEPROM true` is true 
 
 >```cpp
 >void stop();
@@ -151,6 +151,22 @@ Using “S” (or “s”) allows the effect to be ramped at a speed of “££�
 `L020S10` = Linear move, channel ID 0, ramp to 0.2 at a rate of 0.1/sec
 
 As with time interval, the channel ramps to the specified level and continues at that level until given further instructions.
+
+## Magnitude + Extention + RampType
+
+__**Currently This is not apart of the Standard T-Code Protocol and is subject to change**__
+
+Magnitude commands can be modified to contain a ramp type this modifies how the time effects the speed of the transition from 0.0 to 1.0 internally.
+
+`R&$$S£££<>`
+
+Using "<" ">" "<>" or leaving it blank sets the ramp type 
+
+"<" is Ease In
+
+">" is Ease Out
+
+"<>" is Ease In Out 
 
 ## Multiple Channels
 

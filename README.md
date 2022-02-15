@@ -152,6 +152,22 @@ Using “S” (or “s”) allows the effect to be ramped at a speed of “££�
 
 As with time interval, the channel ramps to the specified level and continues at that level until given further instructions.
 
+## Magnitude + Extention + RampType
+
+__**Currently This is not apart of the Standard T-Code Protocol and is subject to change**__
+
+Magnitude commands can be modified to contain a ramp type this modifies how the time effects the speed of the transition from 0.0 to 1.0 internally.
+
+`R&$$S£££<>`
+
+Using "<" ">" "<>" or leaving it blank sets the ramp type 
+
+"<" is Ease In
+
+">" is Ease Out
+
+"<>" is Ease In Out 
+
 ## Multiple Channels
 
 Multiple channels can be operated in parallel, and will do so independently of each other. 

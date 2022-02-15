@@ -258,14 +258,24 @@ void TCode::axisCommand(String input){
     extention = ' ';  
   }
   
+  EasingType rampType = EasingType::LINEAR;
+  if(extention != ' '){
+    char first = getCurrentChar(input,Index++);
+    char second = getCurrentChar(input,Index);
+    switch(first){
+      case '<': if(second == '>'){ rampType = EasingType::EASEINOUT; Index++;} else { rampType = EasingType::EASEIN; } break;
+      case '>': rampType = EasingType::EASEOUT;
+    }
+  }
+  
   if (valid) {
     switch(type) {
       // Axis commands
-      case 'L': Linear[channel].set(magnitude,extention,extMagnitude); break;
-      case 'R': Rotation[channel].set(magnitude,extention,extMagnitude); break;
-      case 'V': Vibration[channel].set(magnitude,extention,extMagnitude); break;
-      case 'A': Auxiliary[channel].set(magnitude,extention,extMagnitude); break;
-    }
+      case 'L': Linear[channel].set(magnitude,extention,extMagnitude);    Linear[channel].setEasingType(rampType);     break;
+      case 'R': Rotation[channel].set(magnitude,extention,extMagnitude);  Rotation[channel].setEasingType(rampType);   break;
+      case 'V': Vibration[channel].set(magnitude,extention,extMagnitude); Vibration[channel].setEasingType(rampType);  break;
+      case 'A': Auxiliary[channel].set(magnitude,extention,extMagnitude); Auxiliary[channel].setEasingType(rampType);  break;
+    }    
   }
 }
 
