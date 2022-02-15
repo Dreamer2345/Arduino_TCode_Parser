@@ -168,6 +168,8 @@ Using "<" ">" "<>" or leaving it blank sets the ramp type
 
 "<>" is Ease In Out 
 
+blank means that the ramp is Linear which is the default
+
 ## Multiple Channels
 
 Multiple channels can be operated in parallel, and will do so independently of each other. 
