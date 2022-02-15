@@ -22,7 +22,7 @@ float easeIn(float t,float e){
 }
 
 float easeOut(float t, float e){
-	t = constrain(t,0.0,1.0);
+	t = constrain(t,0.0f,1.0f);
 	return 1.0 - pow(1-t,e);
 }
 
