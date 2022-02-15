@@ -15,6 +15,7 @@
 
 enum class EasingType{
 	LINEAR,EASEIN,EASEOUT,EASEINOUT,
+	NONE,
 };
 
 class TCodeAxis{
