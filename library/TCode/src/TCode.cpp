@@ -70,13 +70,13 @@ ChannelID TCode::getIDFromStr(String input){
 void TCode::axisEasingType(String ID, EasingType e){
   ChannelID decoded_id = TCode::getIDFromStr(ID);
   if(decoded_id.valid){
-	switch(decoded_id.type) {
-	  // Axis commands
-	  case 'L': Linear[decoded_id.channel].setEasingType(e); break;
-	  case 'R': Rotation[decoded_id.channel].setEasingType(e); break;
-	  case 'V': Vibration[decoded_id.channel].setEasingType(e); break;
-	  case 'A': Auxiliary[decoded_id.channel].setEasingType(e); break;
-	}
+    switch(decoded_id.type) {
+      // Axis commands
+      case 'L': Linear[decoded_id.channel].setEasingType(e); break;
+      case 'R': Rotation[decoded_id.channel].setEasingType(e); break;
+      case 'V': Vibration[decoded_id.channel].setEasingType(e); break;
+      case 'A': Auxiliary[decoded_id.channel].setEasingType(e); break;
+    }
   }
 }
 
@@ -486,3 +486,4 @@ void TCode::sendMessage(String s){
 
 
 #endif
+

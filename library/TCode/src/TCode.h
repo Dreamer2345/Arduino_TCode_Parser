@@ -59,6 +59,7 @@ class TCode{
     void axisRegister(String ID,String Name); // Function to name and activate axis
 	bool axisChanged(String ID); //Function to check if an axis has changed
 	void axisEasingType(String ID, EasingType e); //Function to set the easing type of an axis;
+
 	
     void stop(); //Function stops all outputs
 
@@ -105,29 +106,6 @@ class TCode{
     template< typename T > T &getEEPROM( int idx, T &t ); //Function abstracts the EEPROM get command so that it can be redefined if need be for different board types
     template< typename T > void putEEPROM( int idx, T t ); //Function abstracts the EEPROM put command so that it can be redefined if need be for different board types
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
