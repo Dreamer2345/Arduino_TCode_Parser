@@ -148,7 +148,7 @@ As an alternative, the rate at which the effect is ramped in can be specified.
 
 Using “S” (or “s”) allows the effect to be ramped at a speed of “£££” per hundred milliseconds.
 
-`L020S10` = Linear move, channel ID 0, ramp to 0.2 at a rate of 0.1/sec
+* `L020S10` = Linear move, channel ID 0, ramp to 0.2 at a rate of 0.1/sec
 
 As with time interval, the channel ramps to the specified level and continues at that level until given further instructions.
 
@@ -168,7 +168,7 @@ Using "<" ">" "<>" or leaving it blank sets the ramp type
 
 "<>" is Ease In Out 
 
-blank means that the ramp is Linear which is the default
+* `V099I1000<` = Vibrate, channel ID 0, ramp to 99 over 1 second using the ease in ramp type
 
 ## Multiple Channels
 
