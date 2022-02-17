@@ -6,24 +6,26 @@
 // Container for TCode Axis's 
 // History:
 // 
-
+#pragma once
 #ifndef TCODE_AXIS_CPP
 #define TCODE_AXIS_CPP
 #include "TCodeAxis.h"
 
+
+#ifdef TCODE_HAS_FPU  
 float lerp(float start, float stop, float t){
 	t = constrain(t,0.0f,1.0f);
 	return (((1-t) * start)+(t * stop));
 }
 
-float easeIn(float t,float e){
+float easeIn(float t){
 	t = constrain(t,0.0f,1.0f);
-	return (float)pow(t,e);
+	return t * t;
 }
 
-float easeOut(float t, float e){
+float easeOut(float t){
 	t = constrain(t,0.0f,1.0f);
-	return 1.0 - pow(1-t,e);
+	return 1.0 - ((1-t)*(1-t));
 }
 
 
@@ -31,7 +33,7 @@ float easeOut(float t, float e){
 int mapEaseIn(int in, int inStart, int inEnd, int outStart, int outEnd){
 	float t = in - inStart;
 	t /= (inEnd - inStart);
-	t = easeIn(t,2.0f);
+	t = easeIn(t);
 	t = constrain(t,0.0f,1.0f);
 	t *= (outEnd - outStart);
 	t += outStart;
@@ -42,7 +44,7 @@ int mapEaseIn(int in, int inStart, int inEnd, int outStart, int outEnd){
 int mapEaseOut(int in, int inStart, int inEnd, int outStart, int outEnd){
 	float t = in - inStart;
 	t /= (inEnd - inStart);
-	t = easeOut(t,2.0f);
+	t = easeOut(t);
 	t = constrain(t,0.0f,1.0f);
 	t *= (outEnd - outStart);
 	t += outStart;
@@ -53,14 +55,70 @@ int mapEaseOut(int in, int inStart, int inEnd, int outStart, int outEnd){
 int mapEaseInOut(int in, int inStart, int inEnd, int outStart, int outEnd){
 	float t = in - inStart;
 	t /= (inEnd - inStart);
-	t = lerp(easeIn(t,2.0f),easeOut(t,2.0f),t);
+	t = lerp(easeIn(t),easeOut(t),t);
 	t = constrain(t,0.0f,1.0f);
 	t *= (outEnd - outStart);
 	t += outStart;
 	t += 0.5f;
 	return (int)t;
 }
+#else
+//This is for processors which lack an FPU
+#include "TCodeFixed.h"
+int32_t lerp(int32_t start, int32_t stop, int32_t t){
+	t = constrainQ16(t,0,Q16fromInt(1));
+	int32_t tn = subQ16(Q16fromInt(1),t);
+	int32_t a = multQ16(tn,start);
+	int32_t b = multQ16(t,start);
+	return addQ16(a,b);
+}
 
+int32_t easeIn(int32_t t){
+	t = constrain(t,0,Q16fromInt(1));
+	t = multQ16(t,t);
+	return t;
+}
+
+int32_t easeOut(int32_t t){
+	t = constrain(t,0,Q16fromInt(1));
+	t = subQ16(Q16fromInt(1),t);
+	t = multQ16(t,t);
+	return subQ16(Q16fromInt(1),t);
+}
+
+int mapEaseIn(int in, int inStart, int inEnd, int outStart, int outEnd){
+	int32_t t = Q16fromInt(in - inStart);
+	t = divQ16(t,Q16fromInt(inEnd - inStart));
+	t = easeIn(t);
+	t = constrainQ16(t,0,Q16fromInt(1));
+	t = multQ16(t,Q16fromInt(outEnd - outStart));
+	t = addQ16(t,Q16fromInt(outStart));
+	t = addQ16(t,Q16fromFloat(0.5f));
+	return IntfromQ16(t);
+}
+
+int mapEaseOut(int in, int inStart, int inEnd, int outStart, int outEnd){
+	int32_t t = Q16fromInt(in - inStart);
+	t = divQ16(t,Q16fromInt(inEnd - inStart));
+	t = easeOut(t);
+	t = constrainQ16(t,0,Q16fromInt(1));
+	t = multQ16(Q16fromInt(outEnd - outStart),t);
+	t = addQ16(t,Q16fromInt(outStart));
+	t = addQ16(t,Q16fromFloat(0.5f));
+	return IntfromQ16(t);
+}
+
+int mapEaseInOut(int in, int inStart, int inEnd, int outStart, int outEnd){
+	int32_t t = Q16fromInt(in - inStart);
+	t = divQ16(t,Q16fromInt(inEnd - inStart));
+	t = lerp(easeIn(t),easeOut(t),t);
+	t = constrainQ16(t,0,Q16fromInt(1));
+	t = multQ16(Q16fromInt(outEnd - outStart),t);
+	t = addQ16(t,Q16fromInt(outStart));
+	t = addQ16(t,Q16fromFloat(0.5f));
+	return IntfromQ16(t);
+}
+#endif
 
 // Constructor for Axis Class
 TCodeAxis::TCodeAxis(){

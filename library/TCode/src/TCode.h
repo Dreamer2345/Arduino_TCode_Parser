@@ -11,7 +11,7 @@
 //   10x auxilliary channels (A0, A1, A2... A9)
 // History:
 // 
-
+#pragma once
 #ifndef TCODE_H
 #define TCODE_H
 #include "Arduino.h"

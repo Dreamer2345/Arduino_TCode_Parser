@@ -6,7 +6,7 @@
 // Container for TCode Axis's 
 // History:
 // 
-
+#pragma once
 #ifndef TCODE_AXIS_H
 #define TCODE_AXIS_H
 #include "Arduino.h"
