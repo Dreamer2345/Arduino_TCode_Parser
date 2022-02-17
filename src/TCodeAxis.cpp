@@ -129,6 +129,7 @@ TCodeAxis::TCodeAxis(){
     rampStop = rampStart;
     axisName = "";
     lastT = 0;
+	minInterval = TCODE_MAX_AXIS_SMOOTH_INTERVAL;
 }
 
 void TCodeAxis::setEasingType(EasingType e){
@@ -156,8 +157,12 @@ void TCodeAxis::set(int x, char ext, long y) {
       rampStopTime = t + y;  // Time to arrive at new position
     } break;
     default: if(y == 0){
-      rampStopTime = t;
-      rampStart = x;
+	  int lastInterval = t - rampStartTime;
+      if ((lastInterval > minInterval) && (minInterval < TCODE_MIN_AXIS_SMOOTH_INTERVAL)) { minInterval += 1; }
+      else if ((lastInterval < minInterval) && (minInterval > TCODE_MAX_AXIS_SMOOTH_INTERVAL)) { minInterval -= 1; } 
+      // Set ramp parameters
+      rampStart = getPosition();
+      rampStopTime = t + minInterval;  
     }
   }
   rampStartTime = t;
