@@ -6,11 +6,10 @@
 // Container for TCode Axis's 
 // History:
 // 
-
+#pragma once
 #ifndef TCODE_AXIS_CPP
 #define TCODE_AXIS_CPP
 #include "TCodeAxis.h"
-
 
 
 #ifdef TCODE_HAS_FPU  
@@ -120,9 +119,6 @@ int mapEaseInOut(int in, int inStart, int inEnd, int outStart, int outEnd){
 	return IntfromQ16(t);
 }
 #endif
-
-
-
 
 // Constructor for Axis Class
 TCodeAxis::TCodeAxis(){
