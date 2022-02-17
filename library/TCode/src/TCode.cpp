@@ -11,7 +11,7 @@
 //   10x auxilliary channels (A0, A1, A2... A9)
 // History:
 // 
-
+#pragma once
 #ifndef TCODE_CPP
 #define TCODE_CPP
 #include "TCode.h"
@@ -257,15 +257,26 @@ void TCode::axisCommand(String input){
   } else {
     extention = ' ';  
   }
+  //Uncommenting this line and commenting the other leads to = being the linear command and not leaving it blank as the command
+  //EasingType rampType = EasingType::NONE;
+  EasingType rampType = EasingType::LINEAR;
+  if(extention != ' '){
+    char first = getCurrentChar(input,Index++);
+    char second = getCurrentChar(input,Index);
+    switch(first){
+      case '<': if(second == '>'){ rampType = EasingType::EASEINOUT; Index++;} else { rampType = EasingType::EASEIN; } break;
+      case '>': rampType = EasingType::EASEOUT; break;
+	  case '=': rampType = EasingType::LINEAR; break;
+    }
+  }
   
   if (valid) {
     switch(type) {
-      // Axis commands
-      case 'L': Linear[channel].set(magnitude,extention,extMagnitude); break;
-      case 'R': Rotation[channel].set(magnitude,extention,extMagnitude); break;
-      case 'V': Vibration[channel].set(magnitude,extention,extMagnitude); break;
-      case 'A': Auxiliary[channel].set(magnitude,extention,extMagnitude); break;
-    }
+      case 'L': Linear[channel].set(magnitude,extention,extMagnitude);    if(rampType != EasingType::NONE) Linear[channel].setEasingType(rampType);     break;
+      case 'R': Rotation[channel].set(magnitude,extention,extMagnitude);  if(rampType != EasingType::NONE) Rotation[channel].setEasingType(rampType);   break;
+      case 'V': Vibration[channel].set(magnitude,extention,extMagnitude); if(rampType != EasingType::NONE) Vibration[channel].setEasingType(rampType);  break;
+      case 'A': Auxiliary[channel].set(magnitude,extention,extMagnitude); if(rampType != EasingType::NONE) Auxiliary[channel].setEasingType(rampType);  break;
+    }    
   }
 }
 
@@ -476,3 +487,4 @@ void TCode::sendMessage(String s){
 
 
 #endif
+

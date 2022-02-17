@@ -11,7 +11,7 @@
 //   10x auxilliary channels (A0, A1, A2... A9)
 // History:
 // 
-
+#pragma once
 #ifndef TCODE_H
 #define TCODE_H
 #include "Arduino.h"
@@ -20,7 +20,7 @@
 
 #define TCODE_CHANNEL_TYPES 4
 #define TCODE_CHANNEL_COUNT 10
-#define CURRENT_TCODE_VERSION "TCode v0.3"
+#define CURRENT_TCODE_VERSION "TCode v0.4"
 
 #ifndef TCODE_EEPROM_MEMORY_OFFSET
 #define TCODE_EEPROM_MEMORY_OFFSET 0
@@ -57,9 +57,10 @@ class TCode{
     void axisWrite(String ID,int magnitude,char ext, long extMagnitude); // Function to set an axis
     unsigned long axisLastT(String ID); // Function to query when an axis was last commanded
     void axisRegister(String ID,String Name); // Function to name and activate axis
-    bool axisChanged(String ID); //Function to check if an axis has changed
-    void axisEasingType(String ID, EasingType e); //Function to set the easing type of an axis;
-    
+	bool axisChanged(String ID); //Function to check if an axis has changed
+	void axisEasingType(String ID, EasingType e); //Function to set the easing type of an axis;
+
+	
     void stop(); //Function stops all outputs
 
     void setMessageCallback(TCODE_FUNCTION_PTR_T function); //Function to set the used message callback this can be used to change the method of message transmition (if NULL is passed to this function the default callback will be used)
@@ -105,6 +106,8 @@ class TCode{
     template< typename T > T &getEEPROM( int idx, T &t ); //Function abstracts the EEPROM get command so that it can be redefined if need be for different board types
     template< typename T > void putEEPROM( int idx, T t ); //Function abstracts the EEPROM put command so that it can be redefined if need be for different board types
 };
+
+
 
 
 

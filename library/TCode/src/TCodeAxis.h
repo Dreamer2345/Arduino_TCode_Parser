@@ -6,7 +6,7 @@
 // Container for TCode Axis's 
 // History:
 // 
-
+#pragma once
 #ifndef TCODE_AXIS_H
 #define TCODE_AXIS_H
 #include "Arduino.h"
@@ -14,7 +14,8 @@
 #define TCODE_DEFAULT_AXIS_RETURN_VALUE 5000;
 
 enum class EasingType{
-    LINEAR,EASEIN,EASEOUT,EASEINOUT,
+	LINEAR,EASEIN,EASEOUT,EASEINOUT,
+	NONE,
 };
 
 class TCodeAxis{
@@ -23,16 +24,16 @@ class TCodeAxis{
     void set(int x, char ext, long y); // Function to set the axis dynamic parameters
     int getPosition(); // Function to return the current position of this axis
     void stop(); // Function to stop axis movement at current position
-    
-    bool changed(); //Function to check if an axis has changed since last getPosition
-    
-    void setEasingType(EasingType e); //Function to set the easing type for get position
-    
+	
+	bool changed(); //Function to check if an axis has changed since last getPosition
+	
+	void setEasingType(EasingType e); //Function to set the easing type for get position
+	
     String axisName;
     unsigned long lastT;
-    EasingType easing;
+	EasingType easing;
   private:
-    int lastPosition;
+	int lastPosition;
     int rampStart;
     unsigned long rampStartTime;
     int rampStop;
