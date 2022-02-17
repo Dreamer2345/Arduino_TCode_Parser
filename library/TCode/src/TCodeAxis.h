@@ -12,6 +12,9 @@
 #include "Arduino.h"
 
 #define TCODE_DEFAULT_AXIS_RETURN_VALUE 5000;
+#define TCODE_MIN_AXIS_SMOOTH_INTERVAL 3     // Minimum auto-smooth ramp interval for live commands (ms)
+#define TCODE_MAX_AXIS_SMOOTH_INTERVAL 100   // Maximum auto-smooth ramp interval for live commands (ms)
+
 
 enum class EasingType{
 	LINEAR,EASEIN,EASEOUT,EASEINOUT,
@@ -38,6 +41,7 @@ class TCodeAxis{
     unsigned long rampStartTime;
     int rampStop;
     unsigned long rampStopTime;
+	int minInterval;
 };
 
 
