@@ -83,7 +83,7 @@ private:
     static void defaultCallback(const String& input); // Function which is the default callback for TCode this uses the serial communication if it is setup with Serial.begin() if it is not setup then nothing happens
 
     void axisRow(const String& id,const String& name); // Function to return the details of an axis stored in the EEPROM
-	bool tryGetAxis(ChannelID decoded_id,TCodeAxis & axis); //Function to get the axis specified by a decoded id if successfull returns true
+	bool tryGetAxis(ChannelID decoded_id,TCodeAxis *& axis); //Function to get the axis specified by a decoded id if successfull returns true
 	
 	
     bool isnumber(char c); //Function which returns true if a char is a numerical
@@ -132,9 +132,9 @@ TCode<TCODE_CHANNEL_COUNT>::TCode(const String& firmware,const String& TCode_ver
 template<unsigned TCODE_CHANNEL_COUNT>
 bool TCode<TCODE_CHANNEL_COUNT>::axisChanged(const String& ID) {
     ChannelID decoded_id = TCode::getIDFromStr(ID);
-	TCodeAxis axis;
+	TCodeAxis* axis = nullptr;
 	if(tryGetAxis(decoded_id,axis)){
-		return axis.changed();
+		return axis->changed();
 	}
     return false;
 }
@@ -161,9 +161,9 @@ ChannelID TCode<TCODE_CHANNEL_COUNT>::getIDFromStr(const String& input) {
 template<unsigned TCODE_CHANNEL_COUNT>
 void TCode<TCODE_CHANNEL_COUNT>::axisEasingType(const String& ID, EasingType e) {
     ChannelID decoded_id = TCode::getIDFromStr(ID);
-	TCodeAxis axis;
+	TCodeAxis* axis = nullptr;
 	if(tryGetAxis(decoded_id,axis)){
-		axis.setEasingType(e);
+		axis->setEasingType(e);
 	}
 }
 
@@ -195,9 +195,9 @@ template<unsigned TCODE_CHANNEL_COUNT>
 int TCode<TCODE_CHANNEL_COUNT>::axisRead(const String& inputID) {
     int x = TCODE_DEFAULT_AXIS_RETURN_VALUE; // This is the return variable
     ChannelID decoded_id = TCode::getIDFromStr(inputID);
-	TCodeAxis axis;
+	TCodeAxis* axis = nullptr;
 	if(tryGetAxis(decoded_id,axis)){
-		x = axis.getPosition();
+		x = axis->getPosition();
 	}
     return x;
 }
@@ -205,9 +205,9 @@ int TCode<TCODE_CHANNEL_COUNT>::axisRead(const String& inputID) {
 template<unsigned TCODE_CHANNEL_COUNT>
 void TCode<TCODE_CHANNEL_COUNT>::axisWrite(const String& inputID, int magnitude, char extension, long extMagnitude) {
     ChannelID decoded_id = TCode::getIDFromStr(inputID);
-	TCodeAxis axis;
+	TCodeAxis* axis = nullptr;
 	if(tryGetAxis(decoded_id,axis)){
-		axis.set(magnitude,extension,extMagnitude);
+		axis->set(magnitude,extension,extMagnitude);
 	}
 }
 
@@ -215,9 +215,9 @@ template<unsigned TCODE_CHANNEL_COUNT>
 unsigned long TCode<TCODE_CHANNEL_COUNT>::axisLastT(const String& inputID) {
     unsigned long t = 0; // Return time
     ChannelID decoded_id = TCode::getIDFromStr(inputID);
-	TCodeAxis axis;
+	TCodeAxis* axis = nullptr;
 	if(tryGetAxis(decoded_id,axis)){
-		t = axis.lastT;
+		t = axis->lastT;
 	}
     return t;
 }
@@ -225,9 +225,9 @@ unsigned long TCode<TCODE_CHANNEL_COUNT>::axisLastT(const String& inputID) {
 template<unsigned TCODE_CHANNEL_COUNT>
 void TCode<TCODE_CHANNEL_COUNT>::axisRegister(const String& inputID, const String& axisName) {
     ChannelID decoded_id = TCode::getIDFromStr(inputID);
-	TCodeAxis axis;
+	TCodeAxis* axis = nullptr;
 	if(tryGetAxis(decoded_id,axis)){
-		axis.axisName = axisName;
+		axis->axisName = axisName;
 	}
 }
 
@@ -239,7 +239,7 @@ void TCode<TCODE_CHANNEL_COUNT>::executeString(String& input) {
     while (index > 0) {
 		String sub = input.substring(0,index);
         readCommand(sub);  // Read off first command
-        input = input.substring(index+1);  // Remove first command from string
+        bufferString = input.substring(index+1);  // Remove first command from string
         index = input.indexOf(' ');  // Look for next space
     }
     readCommand(input);  // Read off last command
@@ -375,11 +375,11 @@ void TCode<TCODE_CHANNEL_COUNT>::axisCommand(String& input) {
     }
 	
     if (valid) {
-		TCodeAxis axis;
+		TCodeAxis* axis = nullptr;
 		if(tryGetAxis(decoded_id,axis)){
-			axis.set(magnitude,extention,extMagnitude);
+			axis->set(magnitude,extention,extMagnitude);
 			if(rampType != EasingType::NONE) 
-				axis.setEasingType(rampType);
+				axis->setEasingType(rampType);
 		}
     }
 }
@@ -520,16 +520,18 @@ void TCode<TCODE_CHANNEL_COUNT>::axisRow(const String& id,const String& axisName
         }
     }
 }
+
 template<unsigned TCODE_CHANNEL_COUNT>
-bool TCode<TCODE_CHANNEL_COUNT>::tryGetAxis(ChannelID decoded_id, TCodeAxis & axis)
+bool TCode<TCODE_CHANNEL_COUNT>::tryGetAxis(ChannelID decoded_id, TCodeAxis*& axis)
 {
 	if(decoded_id.valid){
 		switch(decoded_id.type)
 		{
-			case 'L': axis = Linear[decoded_id.channel]; return true;
-			case 'R': axis = Rotation[decoded_id.channel]; return true;
-			case 'V': axis = Vibration[decoded_id.channel]; return true;
-			case 'A': axis = Auxiliary[decoded_id.channel]; return true;
+			
+			case 'L': axis = &Linear[decoded_id.channel]; return true;
+			case 'R': axis = &Rotation[decoded_id.channel];  return true;
+			case 'V': axis = &Vibration[decoded_id.channel]; return true;
+			case 'A': axis = &Auxiliary[decoded_id.channel]; return true;
 			default: return false;
 		}
 	}
