@@ -10,7 +10,7 @@ static const int MAX_DUTY_CYCLE = (int)(pow(2, PWMResolution) - 1);
 static const int PWMCHANNEL = 0;
 static const int PWMPIN = 2;
 
-TCode tcode(FIRMWAREVERSION); //creates an instance of the TCode class
+TCode<1> tcode(FIRMWAREVERSION); //creates an instance of the TCode class
 int PWMVar;
 
 void setup() {
