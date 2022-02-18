@@ -6,7 +6,7 @@
 
 static const int ANALOGPIN = 2;
 
-TCode tcode(FIRMWAREVERSION); //creates an instance of the TCode class
+TCode<1> tcode(FIRMWAREVERSION); //creates an instance of the TCode class
 int AnalogVar;
 
 void setup() {

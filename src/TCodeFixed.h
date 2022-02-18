@@ -1,4 +1,3 @@
-
 // TCode-Fixed-Point-H v1.0,
 // protocal by TempestMAx (https://www.patreon.com/tempestvr)
 // implemented by Eve 05/02/2022
