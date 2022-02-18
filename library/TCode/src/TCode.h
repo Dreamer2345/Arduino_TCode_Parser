@@ -42,10 +42,10 @@ struct ChannelID {
 
 using TCODE_FUNCTION_PTR_T = void (*)(const String & input);
 
-template<unsigned TCODE_CHANNEL_COUNT>
+template<unsigned TCODE_CHANNEL_COUNT = 5>
 class TCode {
 public:
-	static_assert(TCODE_CHANNEL_COUNT > 0, "TCode Channel Count must be larger than or equal to 1");
+	static_assert((TCODE_CHANNEL_COUNT > 0)&&(TCODE_CHANNEL_COUNT <= 10), "TCode Channel Count must be larger than or equal to 1 but less than or equal to 10");
     static constexpr uintmax_t EEPROM_SIZE = TCODE_CHANNEL_COUNT*TCODE_CHANNEL_TYPES*8 + TCODE_EEPROM_MEMORY_ID_LENGTH;
 
     TCode(const String& firmware); // Constructor for class using defined TCode Version number

@@ -10,13 +10,16 @@ protocol made by tempest [found here](https://www.patreon.com/tempestvr/posts?fi
 ---
 ## TCode Class 
 ### Constructors
+
+* both constructors have an extra optional Channel count value which changes how many channels are stored within the class this defaults to 5 however can be in the range of 1...10
+
 >```cpp
->TCode(String firmware);
+>TCode<Channel Count>(String firmware);
 >```
 >>This Constructor Sets the internal firmware string which is returned by passing the command `D0` to the class the TCode Version is set to the default value specified by `#define CURRENT_TCODE_VERSION` this value is returned by passing the command `D1`.
 
 >```cpp
->TCode(String firmware,String TCode_version);
+>TCode<Channel Count>(String firmware,String TCode_version);
 >```
 >>This Constructor Sets the internal firmware string which is returned by passing the command `D0`. this constructor also allows for the setting of the TCode Version which is returned by passing the command `D1`.
 
