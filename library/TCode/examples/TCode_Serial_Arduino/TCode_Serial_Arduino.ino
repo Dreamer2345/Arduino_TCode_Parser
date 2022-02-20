@@ -11,7 +11,7 @@ int AnalogVar;
 
 void setup() {
   Serial.begin(115200);
-  pinMode(ANALOGUEPIN,OUTPUT);
+  pinMode(ANALOGPIN,OUTPUT);
   while(!Serial){}
   tcode.init(); //Initializes the EEPROM and checks for the magic key in memory
   tcode.axisRegister("V0", "PWM"); //Registers our axis Vibrate 0 as PWM
