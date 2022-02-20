@@ -610,7 +610,7 @@ void TCode<TCODE_CHANNEL_COUNT>::sendMessage(const String& s) {
 }
 
 //PER BOARD CODE AREA
-#ifdef ARDUINO_ESP32_DEV
+#if defined(ARDUINO_ESP32_DEV)
 #include <EEPROM.h>
 template<unsigned TCODE_CHANNEL_COUNT>
 void TCode<TCODE_CHANNEL_COUNT>::init() {
@@ -642,7 +642,8 @@ template< typename T > void TCode<TCODE_CHANNEL_COUNT>::putEEPROM( int idx, T t 
     EEPROM.put(idx,t);
     EEPROM.commit();
 }
-#elifdef SAMD_NANO_33_IOT //Nano 33 IOT
+
+#elif defined(ARDUINO_SAMD_NANO_33_IOT) //Nano 33 IOT
 #include <FlashAsEEPROM.h>
 template<unsigned TCODE_CHANNEL_COUNT>
 void TCode<TCODE_CHANNEL_COUNT>::init() {
@@ -677,7 +678,6 @@ template< typename T > void TCode<TCODE_CHANNEL_COUNT>::putEEPROM( int idx, T t 
     for( int count = sizeof(T) ; count ; --count, e++)  EEPROM.update(idx + e, *ptr++);
 	EEPROM.commit();
 }
-
 #else //Uses the default arduino methods for setting EEPROM
 #include <EEPROM.h>
 template<unsigned TCODE_CHANNEL_COUNT>
