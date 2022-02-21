@@ -15,9 +15,9 @@
 #ifndef TCODE_H
 #define TCODE_H
 #include "Arduino.h"
-#include <EEPROM.h>
 #include "TCodeAxis.h"
 
+#define TCODE_MAX_CHANNEL_COUNT 10
 #define TCODE_CHANNEL_TYPES 4
 #define CURRENT_TCODE_VERSION "TCode v0.4"
 
@@ -45,7 +45,7 @@ using TCODE_FUNCTION_PTR_T = void (*)(const String & input);
 template<unsigned TCODE_CHANNEL_COUNT = 5>
 class TCode {
 public:
-	static_assert((TCODE_CHANNEL_COUNT > 0)&&(TCODE_CHANNEL_COUNT <= 10), "TCode Channel Count must be larger than or equal to 1 but less than or equal to 10");
+	static_assert((TCODE_CHANNEL_COUNT > 0)&&(TCODE_CHANNEL_COUNT <= TCODE_MAX_CHANNEL_COUNT), "TCode Channel Count must be larger than or equal to 1 but less than or equal to 10");
     static constexpr uintmax_t EEPROM_SIZE = TCODE_CHANNEL_COUNT*TCODE_CHANNEL_TYPES*8 + TCODE_EEPROM_MEMORY_ID_LENGTH;
 
     TCode(const String& firmware); // Constructor for class using defined TCode Version number
@@ -64,7 +64,7 @@ public:
 
     void stop(); //Function stops all outputs
 
-    void setMessageCallback(TCODE_FUNCTION_PTR_T function); //Function to set the used message callback this can be used to change the method of message transmition (if NULL is passed to this function the default callback will be used)
+    void setMessageCallback(TCODE_FUNCTION_PTR_T function); //Function to set the used message callback this can be used to change the method of message transmition (if nullptr is passed to this function the default callback will be used)
     void sendMessage(const String& s); //Function which calls the callback (the default callback for TCode is Serial communication)
 
     void init(); //Initalizes the EEPROM and checks for the magic string
@@ -117,7 +117,7 @@ TCode<TCODE_CHANNEL_COUNT>::TCode(const String& firmware) {
     firmwareID = firmware;
     versionID = CURRENT_TCODE_VERSION;
     stop();
-    setMessageCallback(NULL);
+    setMessageCallback(nullptr);
 }
 
 template<unsigned TCODE_CHANNEL_COUNT>
@@ -126,7 +126,7 @@ TCode<TCODE_CHANNEL_COUNT>::TCode(const String& firmware,const String& TCode_ver
     firmwareID = firmware;
     versionID = TCode_version;
     stop();
-    setMessageCallback(NULL);
+    setMessageCallback(nullptr);
 }
 
 template<unsigned TCODE_CHANNEL_COUNT>
@@ -595,7 +595,7 @@ void TCode<TCODE_CHANNEL_COUNT>::defaultCallback(const String& input) {
 
 template<unsigned TCODE_CHANNEL_COUNT>
 void TCode<TCODE_CHANNEL_COUNT>::setMessageCallback(TCODE_FUNCTION_PTR_T f) {
-    if(f == NULL) {
+    if(f == nullptr) {
         message_callback = &defaultCallback;
     }
     else {
@@ -605,12 +605,13 @@ void TCode<TCODE_CHANNEL_COUNT>::setMessageCallback(TCODE_FUNCTION_PTR_T f) {
 
 template<unsigned TCODE_CHANNEL_COUNT>
 void TCode<TCODE_CHANNEL_COUNT>::sendMessage(const String& s) {
-    if(message_callback != NULL)
+    if(message_callback != nullptr)
         message_callback(s);
 }
 
 //PER BOARD CODE AREA
-#ifdef ARDUINO_ESP32_DEV
+#if defined(ARDUINO_ESP32_DEV)
+#include <EEPROM.h>
 template<unsigned TCODE_CHANNEL_COUNT>
 void TCode<TCODE_CHANNEL_COUNT>::init() {
     EEPROM.begin(EEPROM_SIZE);
@@ -642,7 +643,43 @@ template< typename T > void TCode<TCODE_CHANNEL_COUNT>::putEEPROM( int idx, T t 
     EEPROM.commit();
 }
 
+#elif defined(ARDUINO_SAMD_NANO_33_IOT) //Nano 33 IOT
+#include <FlashAsEEPROM.h>
+template<unsigned TCODE_CHANNEL_COUNT>
+void TCode<TCODE_CHANNEL_COUNT>::init() {
+    if(!checkMemoryKey() && TCODE_USE_EEPROM) {
+        placeMemoryKey();
+        resetMemory();
+    }
+}
+
+template<unsigned TCODE_CHANNEL_COUNT>
+byte TCode<TCODE_CHANNEL_COUNT>::readEEPROM(int idx) {
+    return EEPROM.read(idx);
+}
+
+template<unsigned TCODE_CHANNEL_COUNT>
+void TCode<TCODE_CHANNEL_COUNT>::writeEEPROM(int idx,byte b) {
+    EEPROM.write(idx,b);
+    EEPROM.commit();
+}
+
+template<unsigned TCODE_CHANNEL_COUNT>
+template< typename T > T &TCode<TCODE_CHANNEL_COUNT>::getEEPROM( int idx, T &t ) {
+	uint8_t *ptr = (uint8_t*) &t;
+	for( int count = sizeof(T) ; count ; --count)  *ptr++ = EEPROM.read(idx);
+	return t;
+}
+
+template<unsigned TCODE_CHANNEL_COUNT>
+template< typename T > void TCode<TCODE_CHANNEL_COUNT>::putEEPROM( int idx, T t ) {
+    const uint8_t *ptr = (const uint8_t*) &t;
+	size_t e = 0;
+    for( int count = sizeof(T) ; count ; --count, e++)  EEPROM.update(idx + e, *ptr++);
+	EEPROM.commit();
+}
 #else //Uses the default arduino methods for setting EEPROM
+#include <EEPROM.h>
 template<unsigned TCODE_CHANNEL_COUNT>
 void TCode<TCODE_CHANNEL_COUNT>::init() {
     if(!checkMemoryKey() && TCODE_USE_EEPROM) {
@@ -660,6 +697,7 @@ template<unsigned TCODE_CHANNEL_COUNT>
 void TCode<TCODE_CHANNEL_COUNT>::writeEEPROM(int idx,byte b) {
     EEPROM.write(idx,b);
 }
+
 
 template<unsigned TCODE_CHANNEL_COUNT>
 template< typename T > T &TCode<TCODE_CHANNEL_COUNT>::getEEPROM( int idx, T &t ) {
