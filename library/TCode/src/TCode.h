@@ -46,7 +46,7 @@ template<unsigned TCODE_CHANNEL_COUNT = 5>
 class TCode {
 public:
 	static_assert((TCODE_CHANNEL_COUNT > 0)&&(TCODE_CHANNEL_COUNT <= TCODE_MAX_CHANNEL_COUNT), "TCode Channel Count must be larger than or equal to 1 but less than or equal to 10");
-    static constexpr uintmax_t EEPROM_SIZE = TCODE_CHANNEL_COUNT*TCODE_CHANNEL_TYPES*8 + TCODE_EEPROM_MEMORY_ID_LENGTH;
+    static constexpr uintmax_t EEPROM_SIZE = TCODE_CHANNEL_COUNT*TCODE_CHANNEL_TYPES*sizeof(int)*2 + TCODE_EEPROM_MEMORY_ID_LENGTH;
 
     TCode(const String& firmware); // Constructor for class using defined TCode Version number
     TCode(const String& firmware,const String& TCode_version); // Constructor for class using user defined TCode Version number
@@ -104,6 +104,8 @@ private:
     int getMemoryLocation(const String& id); //Function to get the memory location of an ID
     void updateSavedMemory(const String& id,int low, int high); //Function to update the memory location of an id
 
+
+	void commitEEPROMChanges(); //Function abstracts the commit function for different board types;
     byte readEEPROM(int idx); //Function abstracts the EEPROM read command so that it can be redefined if need be for different board types
     void writeEEPROM(int idx,byte b); //Function abstracts the EEPROM write command so that it can be redefined if need be for different board types
     template< typename T > T &getEEPROM( int idx, T &t ); //Function abstracts the EEPROM get command so that it can be redefined if need be for different board types
@@ -467,7 +469,7 @@ int TCode<TCODE_CHANNEL_COUNT>::getMemoryLocation(const String& id) {
 
 template<unsigned TCODE_CHANNEL_COUNT>
 bool TCode<TCODE_CHANNEL_COUNT>::checkMemoryKey() {
-    char b[TCODE_EEPROM_MEMORY_ID_LENGTH];
+    char b[TCODE_EEPROM_MEMORY_ID_LENGTH+1];
     for(int i = 0; i < TCODE_EEPROM_MEMORY_ID_LENGTH; i++)
         b[i] = (char)readEEPROM(TCODE_EEPROM_MEMORY_OFFSET+i);
     return(String(b) == String(TCODE_EEPROM_MEMORY_ID));
@@ -475,7 +477,10 @@ bool TCode<TCODE_CHANNEL_COUNT>::checkMemoryKey() {
 
 template<unsigned TCODE_CHANNEL_COUNT>
 void TCode<TCODE_CHANNEL_COUNT>::placeMemoryKey() {
-    putEEPROM(TCODE_EEPROM_MEMORY_OFFSET,TCODE_EEPROM_MEMORY_ID);
+	for(int i = 0; i < TCODE_EEPROM_MEMORY_ID_LENGTH; i++){
+		writeEEPROM(TCODE_EEPROM_MEMORY_OFFSET+i,TCODE_EEPROM_MEMORY_ID[i]);
+	}
+	commitEEPROMChanges();
 }
 
 template<unsigned TCODE_CHANNEL_COUNT>
@@ -488,6 +493,7 @@ void TCode<TCODE_CHANNEL_COUNT>::resetMemory() {
             putEEPROM(memloc+sizeof(int),((int)0));
         }
     }
+	commitEEPROMChanges();
 }
 
 template<unsigned TCODE_CHANNEL_COUNT>
@@ -501,6 +507,7 @@ void TCode<TCODE_CHANNEL_COUNT>::updateSavedMemory(const String& id,int low,int 
             putEEPROM(memloc,low);
             memloc += sizeof(int);
             putEEPROM(memloc,high);
+			commitEEPROMChanges();
         }
     }
 }
@@ -541,14 +548,16 @@ bool TCode<TCODE_CHANNEL_COUNT>::tryGetAxis(ChannelID decoded_id, TCodeAxis*& ax
 
 template<unsigned TCODE_CHANNEL_COUNT>
 void TCode<TCODE_CHANNEL_COUNT>::setupCommand(String& input) {
-    int index = 3;
     input = input.substring(1);
+	int index = 3;
+	Serial.println(input);
     ChannelID decoded_id = getIDFromStr(input);
     bool valid = decoded_id.valid;
     int low = 0;
     int high = 0;
 
     String lowStr = getNextIntStr(input,index);
+	index++;
     low = lowStr.toInt();
     low = constrain(low,0,9999);
     if (low == 0 && lowStr.charAt(lowStr.length()-1) != '0') {
@@ -614,12 +623,30 @@ void TCode<TCODE_CHANNEL_COUNT>::sendMessage(const String& s) {
 #include <EEPROM.h>
 template<unsigned TCODE_CHANNEL_COUNT>
 void TCode<TCODE_CHANNEL_COUNT>::init() {
-    EEPROM.begin(EEPROM_SIZE);
+	if (!EEPROM.begin(EEPROM_SIZE))
+    {
+		sendMessage(F("EEPROM failed to initialise\n"));
+    }
+    else
+    {
+		sendMessage(F("EEPROM initialised\n"));
+    }
+	
     if(!checkMemoryKey() && TCODE_USE_EEPROM) {
         placeMemoryKey();
         resetMemory();
+		commitEEPROMChanges();
     }
 }
+
+template<unsigned TCODE_CHANNEL_COUNT>
+void TCode<TCODE_CHANNEL_COUNT>::commitEEPROMChanges(){
+	if (EEPROM.commit()) {
+		sendMessage(F("EEPROM successfully committed!\n"));
+    } else {
+		sendMessage(F("ERROR! EEPROM commit failed!\n"));
+    }
+}	
 
 template<unsigned TCODE_CHANNEL_COUNT>
 byte TCode<TCODE_CHANNEL_COUNT>::readEEPROM(int idx) {
@@ -629,7 +656,6 @@ byte TCode<TCODE_CHANNEL_COUNT>::readEEPROM(int idx) {
 template<unsigned TCODE_CHANNEL_COUNT>
 void TCode<TCODE_CHANNEL_COUNT>::writeEEPROM(int idx,byte b) {
     EEPROM.write(idx,b);
-    EEPROM.commit();
 }
 
 template<unsigned TCODE_CHANNEL_COUNT>
@@ -640,18 +666,36 @@ template< typename T > T &TCode<TCODE_CHANNEL_COUNT>::getEEPROM( int idx, T &t )
 template<unsigned TCODE_CHANNEL_COUNT>
 template< typename T > void TCode<TCODE_CHANNEL_COUNT>::putEEPROM( int idx, T t ) {
     EEPROM.put(idx,t);
-    EEPROM.commit();
 }
 
 #elif defined(ARDUINO_SAMD_NANO_33_IOT) //Nano 33 IOT
 #include <FlashAsEEPROM.h>
 template<unsigned TCODE_CHANNEL_COUNT>
 void TCode<TCODE_CHANNEL_COUNT>::init() {
+	if (!EEPROM.begin())
+    {
+		sendMessage(F("EEPROM failed to initialise\n"));
+    }
+    else
+    {
+		sendMessage(F("EEPROM initialised\n"));
+    }
+	
     if(!checkMemoryKey() && TCODE_USE_EEPROM) {
         placeMemoryKey();
         resetMemory();
+		commitEEPROMChanges();
     }
 }
+
+template<unsigned TCODE_CHANNEL_COUNT>
+void TCode<TCODE_CHANNEL_COUNT>::commitEEPROMChanges(){
+	if (EEPROM.commit()) {
+		sendMessage(F("EEPROM successfully committed!\n"));
+    } else {
+		sendMessage(F("ERROR! EEPROM commit failed!\n"));
+    }
+}	
 
 template<unsigned TCODE_CHANNEL_COUNT>
 byte TCode<TCODE_CHANNEL_COUNT>::readEEPROM(int idx) {
@@ -661,7 +705,6 @@ byte TCode<TCODE_CHANNEL_COUNT>::readEEPROM(int idx) {
 template<unsigned TCODE_CHANNEL_COUNT>
 void TCode<TCODE_CHANNEL_COUNT>::writeEEPROM(int idx,byte b) {
     EEPROM.write(idx,b);
-    EEPROM.commit();
 }
 
 template<unsigned TCODE_CHANNEL_COUNT>
@@ -676,17 +719,31 @@ template< typename T > void TCode<TCODE_CHANNEL_COUNT>::putEEPROM( int idx, T t 
     const uint8_t *ptr = (const uint8_t*) &t;
 	size_t e = 0;
     for( int count = sizeof(T) ; count ; --count, e++)  EEPROM.update(idx + e, *ptr++);
-	EEPROM.commit();
 }
 #else //Uses the default arduino methods for setting EEPROM
 #include <EEPROM.h>
 template<unsigned TCODE_CHANNEL_COUNT>
 void TCode<TCODE_CHANNEL_COUNT>::init() {
+	if (!EEPROM.begin())
+    {
+		sendMessage(F("EEPROM failed to initialise\n"));
+    }
+    else
+    {
+		sendMessage(F("EEPROM initialised\n"));
+    }
+	
     if(!checkMemoryKey() && TCODE_USE_EEPROM) {
         placeMemoryKey();
         resetMemory();
+		commitEEPROMChanges();
     }
 }
+
+template<unsigned TCODE_CHANNEL_COUNT>
+void TCode<TCODE_CHANNEL_COUNT>::commitEEPROMChanges(){
+	EEPROM.commit();
+}	
 
 template<unsigned TCODE_CHANNEL_COUNT>
 byte TCode<TCODE_CHANNEL_COUNT>::readEEPROM(int idx) {

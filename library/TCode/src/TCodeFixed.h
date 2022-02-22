@@ -11,7 +11,7 @@
 #define TCODE_FIXED_POINT_H
 #include "Arduino.h"
 
-#define Q 16
+#define Q 19
 #define K (1 << (Q - 1))
 
 /*
