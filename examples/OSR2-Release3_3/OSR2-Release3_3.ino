@@ -108,6 +108,7 @@ void setup() {
 
   // Start serial connection and report status
   Serial.begin(115200);
+  tcode.init();
   tcode.inputString(F("D0"));
   tcode.inputString(F("D1"));
 
