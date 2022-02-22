@@ -742,7 +742,6 @@ void TCode<TCODE_CHANNEL_COUNT>::init() {
 
 template<unsigned TCODE_CHANNEL_COUNT>
 void TCode<TCODE_CHANNEL_COUNT>::commitEEPROMChanges(){
-	EEPROM.commit();
 }	
 
 template<unsigned TCODE_CHANNEL_COUNT>
