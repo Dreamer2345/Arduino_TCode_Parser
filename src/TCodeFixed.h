@@ -11,7 +11,7 @@
 #define TCODE_FIXED_POINT_H
 #include "Arduino.h"
 
-#define Q 19
+#define Q 16
 #define K (1 << (Q - 1))
 
 /*
@@ -51,7 +51,7 @@ int32_t constrainQ16(int32_t v, int32_t min, int32_t max){
 }
 
 int32_t Q16fromInt(int i){
-	return i << Q;
+	return ((int32_t)i) << Q;
 }
 
 int32_t Q16fromFloat(float i){

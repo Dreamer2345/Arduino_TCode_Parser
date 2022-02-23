@@ -490,7 +490,7 @@ void TCode<TCODE_CHANNEL_COUNT>::resetMemory() {
         for(int i = 0; i < TCODE_CHANNEL_COUNT; i++) {
             int memloc = ((sizeof(int)*2)*TCODE_CHANNEL_COUNT*j)+((sizeof(int)*2)*i) + headerEnd;
             putEEPROM(memloc,((int)0));
-            putEEPROM(memloc+sizeof(int),((int)0));
+            putEEPROM(memloc+sizeof(int),((int)9999));
         }
     }
 	commitEEPROMChanges();
@@ -550,7 +550,6 @@ template<unsigned TCODE_CHANNEL_COUNT>
 void TCode<TCODE_CHANNEL_COUNT>::setupCommand(String& input) {
     input = input.substring(1);
 	int index = 3;
-	Serial.println(input);
     ChannelID decoded_id = getIDFromStr(input);
     bool valid = decoded_id.valid;
     int low = 0;
@@ -567,7 +566,7 @@ void TCode<TCODE_CHANNEL_COUNT>::setupCommand(String& input) {
     String highStr = getNextIntStr(input,index);
     high = highStr.toInt();
     high = constrain(high,0,9999);
-    if (low == 0 && highStr.charAt(highStr.length()-1) != '0') {
+    if (high == 0 && highStr.charAt(highStr.length()-1) != '0') {
         valid = false;
     }
 
@@ -724,14 +723,9 @@ template< typename T > void TCode<TCODE_CHANNEL_COUNT>::putEEPROM( int idx, T t 
 #include <EEPROM.h>
 template<unsigned TCODE_CHANNEL_COUNT>
 void TCode<TCODE_CHANNEL_COUNT>::init() {
-	if (!EEPROM.begin())
-    {
-		sendMessage(F("EEPROM failed to initialise\n"));
-    }
-    else
-    {
-		sendMessage(F("EEPROM initialised\n"));
-    }
+
+	sendMessage(F("EEPROM initialised\n"));
+
 	
     if(!checkMemoryKey() && TCODE_USE_EEPROM) {
         placeMemoryKey();

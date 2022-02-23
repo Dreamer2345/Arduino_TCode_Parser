@@ -102,7 +102,7 @@ int32_t lerp(int32_t start, int32_t stop, int32_t t) {
     t = constrainQ16(t,0,Q16fromInt(1));
     int32_t tn = subQ16(Q16fromInt(1),t);
     int32_t a = multQ16(tn,start);
-    int32_t b = multQ16(t,start);
+    int32_t b = multQ16(t,stop);
     return addQ16(a,b);
 }
 
@@ -126,7 +126,6 @@ int mapEaseIn(int in, int inStart, int inEnd, int outStart, int outEnd) {
     t = constrainQ16(t,0,Q16fromInt(1));
     t = multQ16(t,Q16fromInt(outEnd - outStart));
     t = addQ16(t,Q16fromInt(outStart));
-    t = addQ16(t,Q16fromFloat(0.5f));
     return IntfromQ16(t);
 }
 
@@ -137,7 +136,6 @@ int mapEaseOut(int in, int inStart, int inEnd, int outStart, int outEnd) {
     t = constrainQ16(t,0,Q16fromInt(1));
     t = multQ16(Q16fromInt(outEnd - outStart),t);
     t = addQ16(t,Q16fromInt(outStart));
-    t = addQ16(t,Q16fromFloat(0.5f));
     return IntfromQ16(t);
 }
 
@@ -148,7 +146,6 @@ int mapEaseInOut(int in, int inStart, int inEnd, int outStart, int outEnd) {
     t = constrainQ16(t,0,Q16fromInt(1));
     t = multQ16(Q16fromInt(outEnd - outStart),t);
     t = addQ16(t,Q16fromInt(outStart));
-    t = addQ16(t,Q16fromFloat(0.5f));
     return IntfromQ16(t);
 }
 #endif
