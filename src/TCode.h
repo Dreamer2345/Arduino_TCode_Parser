@@ -284,6 +284,7 @@ void TCode<TCODE_CHANNEL_COUNT>::executeNextBufferCommand()
             buffer.pop();
         }
     }
+    
     readCommand(subbuf);
 }
 
@@ -296,7 +297,7 @@ void TCode<TCODE_CHANNEL_COUNT>::executeString(String &input)
     while (index > 0)
     {
         String sub = input.substring(lastIndex, index);
-        readCommand(sub);           // Read off first command
+        readCommand(sub); // Read off first command
         lastIndex = index;
         index = input.indexOf(' '); // Look for next space
     }
@@ -395,8 +396,6 @@ void TCode<TCODE_CHANNEL_COUNT>::axisCommand(String &input)
     int magnitude = 0;
     long extMagnitude = 0;
 
-    
-
     String magnitudeStr = getNextIntStr(input, Index);
     while (magnitudeStr.length() < 4)
     {
@@ -453,7 +452,7 @@ void TCode<TCODE_CHANNEL_COUNT>::axisCommand(String &input)
             break;
         }
     }
-    
+
     if (valid)
     {
         TCodeAxis *axis = nullptr;
