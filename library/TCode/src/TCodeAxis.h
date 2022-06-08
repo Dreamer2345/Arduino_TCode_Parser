@@ -138,7 +138,6 @@ int mapEaseIn(int in, int inStart, int inEnd, int outStart, int outEnd)
     t = constrainQ16(t, 0, Q16fromInt(1));
     t = multQ16(t, Q16fromInt(outEnd - outStart));
     t = addQ16(t, Q16fromInt(outStart));
-    t = constrainQ16(t, Q16fromInt(outStart), Q16fromInt(outEnd));
     return IntfromQ16(t);
 }
 
@@ -150,7 +149,6 @@ int mapEaseOut(int in, int inStart, int inEnd, int outStart, int outEnd)
     t = constrainQ16(t, 0, Q16fromInt(1));
     t = multQ16(Q16fromInt(outEnd - outStart), t);
     t = addQ16(t, Q16fromInt(outStart));
-    t = constrainQ16(t, Q16fromInt(outStart), Q16fromInt(outEnd));
     return IntfromQ16(t);
 }
 
@@ -162,7 +160,6 @@ int mapEaseInOut(int in, int inStart, int inEnd, int outStart, int outEnd)
     t = constrainQ16(t, 0, Q16fromInt(1));
     t = multQ16(Q16fromInt(outEnd - outStart), t);
     t = addQ16(t, Q16fromInt(outStart));
-    t = constrainQ16(t, Q16fromInt(outStart), Q16fromInt(outEnd));
     return IntfromQ16(t);
 }
 #endif

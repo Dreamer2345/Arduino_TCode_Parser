@@ -33,6 +33,7 @@ setMessageCallback	KEYWORD2
 sendMessage	KEYWORD2
 
 init	KEYWORD2
+clearBuffer	KEYWORD2
 
 isnumber	KEYWORD2
 getNextIntStr	KEYWORD2

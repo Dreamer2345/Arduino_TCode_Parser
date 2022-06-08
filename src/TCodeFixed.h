@@ -12,7 +12,6 @@
 #include "Arduino.h"
 
 #define Q 16
-#define K (1 << (Q - 1))
 
 /*
 int32_t sat_Q16(int64_t x)
