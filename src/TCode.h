@@ -37,6 +37,14 @@
 #define TCODE_COMMAND_BUFFER_LENGTH 255
 #endif
 
+#ifndef TCODE_MAX_AXIS
+#define TCODE_MAX_AXIS 9999
+#endif
+
+#ifndef TCODE_MAX_AXIS_MAGNITUDE
+#define TCODE_MAX_AXIS_MAGNITUDE 9999999
+#endif
+
 struct ChannelID
 {
     char type;
@@ -71,8 +79,9 @@ public:
     void setMessageCallback(TCODE_FUNCTION_PTR_T function); // Function to set the used message callback this can be used to change the method of message transmition (if nullptr is passed to this function the default callback will be used)
     void sendMessage(const String &s);                      // Function which calls the callback (the default callback for TCode is Serial communication)
 
+    void clearBuffer();
+    
     void init(); // Initalizes the EEPROM and checks for the magic string
-
 private:
     String versionID;
     String firmwareID;
@@ -137,6 +146,12 @@ TCode<TCODE_CHANNEL_COUNT>::TCode(const String &firmware, const String &TCode_ve
     versionID = TCode_version;
     stop();
     setMessageCallback(nullptr);
+}
+
+template <unsigned TCODE_CHANNEL_COUNT>
+void TCode<TCODE_CHANNEL_COUNT>::clearBuffer()
+{
+    buffer.clear();
 }
 
 template <unsigned TCODE_CHANNEL_COUNT>
@@ -402,7 +417,7 @@ void TCode<TCODE_CHANNEL_COUNT>::axisCommand(String &input)
         magnitudeStr += '0';
     }
     magnitude = magnitudeStr.toInt();
-    magnitude = constrain(magnitude, 0, 9999);
+    magnitude = constrain(magnitude, 0, TCODE_MAX_AXIS);
     if (magnitude == 0 && magnitudeStr.charAt(magnitudeStr.length() - 1) != '0')
     {
         valid = false;
@@ -413,7 +428,7 @@ void TCode<TCODE_CHANNEL_COUNT>::axisCommand(String &input)
     {
         String extMagnitudeStr = getNextIntStr(input, Index);
         extMagnitude = extMagnitudeStr.toInt();
-        extMagnitude = constrain(extMagnitude, 0, 9999999);
+        extMagnitude = constrain(extMagnitude, 0, TCODE_MAX_AXIS_MAGNITUDE);
         if (extMagnitude == 0 && extMagnitudeStr.charAt(extMagnitudeStr.length() - 1) != '0')
         {
             extention = ' ';
@@ -423,6 +438,7 @@ void TCode<TCODE_CHANNEL_COUNT>::axisCommand(String &input)
     else
     {
         extention = ' ';
+        Index--;
     }
     // Uncommenting this line and commenting the other leads to = being the linear command and not leaving it blank as the command
     // EasingType rampType = EasingType::NONE;
@@ -452,6 +468,10 @@ void TCode<TCODE_CHANNEL_COUNT>::axisCommand(String &input)
             break;
         }
     }
+
+    char last = getCurrentChar(input, Index);
+    if(last != '\0')
+        valid = false;
 
     if (valid)
     {
@@ -589,7 +609,7 @@ void TCode<TCODE_CHANNEL_COUNT>::resetMemory()
         {
             int memloc = ((sizeof(int) * 2) * TCODE_CHANNEL_COUNT * j) + ((sizeof(int) * 2) * i) + headerEnd;
             putEEPROM(memloc, ((int)0));
-            putEEPROM(memloc + sizeof(int), ((int)9999));
+            putEEPROM(memloc + sizeof(int), ((int)TCODE_MAX_AXIS));
         }
     }
     commitEEPROMChanges();
@@ -604,8 +624,8 @@ void TCode<TCODE_CHANNEL_COUNT>::updateSavedMemory(const String &id, int low, in
         int memloc = getMemoryLocation(id);
         if (memloc >= 0)
         {
-            low = constrain(low, 0, 9999);
-            high = constrain(high, 0, 9999);
+            low = constrain(low, 0, TCODE_MAX_AXIS);
+            high = constrain(high, 0, TCODE_MAX_AXIS);
             putEEPROM(memloc, low);
             memloc += sizeof(int);
             putEEPROM(memloc, high);
@@ -626,8 +646,8 @@ void TCode<TCODE_CHANNEL_COUNT>::axisRow(const String &id, const String &axisNam
             getEEPROM(memloc, low);
             memloc += sizeof(int);
             getEEPROM(memloc, high);
-            low = constrain(low, 0, 9999);
-            high = constrain(high, 0, 9999);
+            low = constrain(low, 0, TCODE_MAX_AXIS);
+            high = constrain(high, 0, TCODE_MAX_AXIS);
             sendMessage(id + " " + String(low) + " " + String(high) + " " + axisName + "\n");
         }
     }
@@ -673,7 +693,7 @@ void TCode<TCODE_CHANNEL_COUNT>::setupCommand(String &input)
     String lowStr = getNextIntStr(input, index);
     index++;
     low = lowStr.toInt();
-    low = constrain(low, 0, 9999);
+    low = constrain(low, 0, TCODE_MAX_AXIS);
     if (low == 0 && lowStr.charAt(lowStr.length() - 1) != '0')
     {
         valid = false;
@@ -681,7 +701,7 @@ void TCode<TCODE_CHANNEL_COUNT>::setupCommand(String &input)
 
     String highStr = getNextIntStr(input, index);
     high = highStr.toInt();
-    high = constrain(high, 0, 9999);
+    high = constrain(high, 0, TCODE_MAX_AXIS);
     if (high == 0 && highStr.charAt(highStr.length() - 1) != '0')
     {
         valid = false;
@@ -710,7 +730,7 @@ void TCode<TCODE_CHANNEL_COUNT>::setupCommand(String &input)
         }
         else
         {
-            sendMessage("EEPROM NOT IN USE\n");
+            sendMessage(F("EEPROM NOT IN USE\n"));
         }
     }
 }
@@ -877,15 +897,13 @@ void TCode<TCODE_CHANNEL_COUNT>::putEEPROM(int idx, T t)
 template <unsigned TCODE_CHANNEL_COUNT>
 void TCode<TCODE_CHANNEL_COUNT>::init()
 {
-
-    sendMessage(F("EEPROM initialised\n"));
-
     if (!checkMemoryKey() && TCODE_USE_EEPROM)
     {
         placeMemoryKey();
         resetMemory();
         commitEEPROMChanges();
     }
+    sendMessage(F("EEPROM initialised\n"));
 }
 
 template <unsigned TCODE_CHANNEL_COUNT>

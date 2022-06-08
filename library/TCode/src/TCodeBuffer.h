@@ -16,7 +16,7 @@
 #ifndef TCODE_BUFFER_H
 #define TCODE_BUFFER_H
 
-template <unsigned TCODE_BUFFER_LENGTH = 255>
+template <unsigned TCODE_BUFFER_LENGTH = 127>
 class TCodeBuffer
 {
 private:
@@ -60,7 +60,7 @@ template <unsigned TCODE_BUFFER_LENGTH>
 unsigned TCodeBuffer<TCODE_BUFFER_LENGTH>::count()
 {
     if (Back >= Front)
-        return Front - Back;
+        return Back - Front;
 
     return TCODE_BUFFER_LENGTH - (Front - Back);
 }
