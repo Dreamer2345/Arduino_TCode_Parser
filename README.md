@@ -10,16 +10,13 @@ protocol made by tempest [found here](https://www.patreon.com/tempestvr/posts?fi
 ---
 ## TCode Class 
 ### Constructors
-
-* both constructors have an extra optional Channel count value which changes how many channels are stored within the class this defaults to 5 however can be in the range of 1...10
-
 >```cpp
->TCode<Channel Count>(String firmware);
+>TCode(String firmware);
 >```
 >>This Constructor Sets the internal firmware string which is returned by passing the command `D0` to the class the TCode Version is set to the default value specified by `#define CURRENT_TCODE_VERSION` this value is returned by passing the command `D1`.
 
 >```cpp
->TCode<Channel Count>(String firmware,String TCode_version);
+>TCode(String firmware,String TCode_version);
 >```
 >>This Constructor Sets the internal firmware string which is returned by passing the command `D0`. this constructor also allows for the setting of the TCode Version which is returned by passing the command `D1`.
 
@@ -48,7 +45,7 @@ protocol made by tempest [found here](https://www.patreon.com/tempestvr/posts?fi
 >```cpp
 >void inputString(String input);
 >```
->>This Function Sets the internal buffer to the input string and executes that string immediately not waiting for a `'\n'`. commands given to this function do not require a '\n' to execute.
+>>This function passes
 
 >```cpp
 >int axisRead(String ID);
@@ -100,7 +97,7 @@ protocol made by tempest [found here](https://www.patreon.com/tempestvr/posts?fi
 # Toy code ("T-code")
 [Link to the source for this documention on "T-Code"](https://stpihkal.docs.buttplug.io/protocols/tcode.html#introduction)
 
-Version 0.3, as of 10th May 2021
+Version 0.5, as of 10th September 2022
 
 Created by [Tempest For the OSR-2, SR-6, and other DIY toys](https://patreon.com/tempestvr)
 
@@ -151,7 +148,7 @@ As an alternative, the rate at which the effect is ramped in can be specified.
 
 Using “S” (or “s”) allows the effect to be ramped at a speed of “£££” per hundred milliseconds.
 
-* `L020S10` = Linear move, channel ID 0, ramp to 0.2 at a rate of 0.1/sec
+`L020S10` = Linear move, channel ID 0, ramp to 0.2 at a rate of 0.1/sec
 
 As with time interval, the channel ramps to the specified level and continues at that level until given further instructions.
 
@@ -171,7 +168,7 @@ Using "<" ">" "<>" or leaving it blank sets the ramp type
 
 "<>" is Ease In Out 
 
-* `V099I1000<` = Vibrate, channel ID 0, ramp to 99 over 1 second using the ease in ramp type
+blank means that the ramp is Linear which is the default
 
 ## Multiple Channels
 
@@ -228,3 +225,13 @@ Where:
 * ZZZZ is the preferred maximum (0000-9999)
 
 Note that saved preferences do not change the behaviour of the device itself. They exist as a reference for the driving app or plugin, accessed via the `D2` command.
+
+## External Commands
+
+This is used per-device and is processed internally by that device this should be specified by the device manafacturer the prefix for this command is `#`
+
+These take the form of the prefix symbol followed by any command to be sent to the external device
+
+if spaces are needed in the external command they can be wrapped in brackets `[` and `]`
+
+These take the form `#This[is a valid]External[Command[:)]]`

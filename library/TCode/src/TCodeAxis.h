@@ -10,37 +10,48 @@
 #ifndef TCODE_AXIS_H
 #define TCODE_AXIS_H
 #include "Arduino.h"
+#include "TCodeConstants.h"
+#include "TCodeEnums.h"
 
+/**
+ * @brief Value used to define the default value for a TCode Axis
+ */
 #define TCODE_DEFAULT_AXIS_RETURN_VALUE 5000;
-#define TCODE_MIN_AXIS_SMOOTH_INTERVAL 3   // Minimum auto-smooth ramp interval for live commands (ms)
+
+/**
+ * @brief Value used to define the auto-smooth interval minimum range used in live commands (ms)
+ */
+#define TCODE_MIN_AXIS_SMOOTH_INTERVAL 3 // Minimum auto-smooth ramp interval for live commands (ms)
+
+/**
+ * @brief Value used to define the auto-smooth interval maximum range used in live commands (ms)
+ */
 #define TCODE_MAX_AXIS_SMOOTH_INTERVAL 100 // Maximum auto-smooth ramp interval for live commands (ms)
 
-enum class EasingType
-{
-    LINEAR,
-    EASEIN,
-    EASEOUT,
-    EASEINOUT,
-    NONE,
-};
-
+/**
+ * @brief Class used to represent a TCode Axis
+ */
 class TCodeAxis
 {
 public:
     TCodeAxis();
-    void set(int x, char ext, long y); // Function to set the axis dynamic parameters
-    int getPosition();                 // Function to return the current position of this axis
-    void stop();                       // Function to stop axis movement at current position
+    void set(int x, TCode_Axis_Extention_Type ext, long y); // Function to set the axis dynamic parameters
+    int getPosition();                                      // Function to return the current position of this axis
+    void stop();                                            // Function to stop axis movement at current position
 
     bool changed(); // Function to check if an axis has changed since last getPosition
 
-    void setEasingType(EasingType e); // Function to set the easing type for get position
+    void setRampType(TCode_Axis_Ramp_Type e); // Function to set the ramp type for get position
 
-    String axisName;
-    unsigned long lastT;
-    EasingType easing;
+    void setName(String value); // Function to set the name for this axis
+    String getName();           // Function to get the name for this axis
+    bool isUsed();              // Function to return if this axis has a Name used for figuring out if it is used
+
+    unsigned long lastT;       // The last time this Axis was updated represented in millis
+    TCode_Axis_Ramp_Type ramp; // The ramp type used by this axis
 
 private:
+    String axisName;
     int lastPosition;
     int rampStart;
     unsigned long rampStartTime;
@@ -49,7 +60,7 @@ private:
     int minInterval;
 };
 
-#ifdef TCODE_HAS_FPU
+#if defined(TCODE_HAS_FPU)
 float lerp(float start, float stop, float t)
 {
     t = constrain(t, 0.0f, 1.0f);
@@ -106,68 +117,12 @@ int mapEaseInOut(int in, int inStart, int inEnd, int outStart, int outEnd)
 #else
 // This is for processors which lack an FPU
 #include "TCodeFixed.h"
-int32_t lerp(int32_t start, int32_t stop, int32_t t)
-{
-    t = constrainQ16(t, 0, Q16fromInt(1));
-    int32_t tn = subQ16(Q16fromInt(1), t);
-    int32_t a = multQ16(tn, start);
-    int32_t b = multQ16(t, stop);
-    return addQ16(a, b);
-}
-
-int32_t easeIn(int32_t t)
-{
-    t = constrain(t, 0, Q16fromInt(1));
-    t = multQ16(t, t);
-    return t;
-}
-
-int32_t easeOut(int32_t t)
-{
-    t = constrain(t, 0, Q16fromInt(1));
-    t = subQ16(Q16fromInt(1), t);
-    t = multQ16(t, t);
-    return subQ16(Q16fromInt(1), t);
-}
-
-int mapEaseIn(int in, int inStart, int inEnd, int outStart, int outEnd)
-{
-    int32_t t = Q16fromInt(in - inStart);
-    t = divQ16(t, Q16fromInt(inEnd - inStart));
-    t = easeIn(t);
-    t = constrainQ16(t, 0, Q16fromInt(1));
-    t = multQ16(t, Q16fromInt(outEnd - outStart));
-    t = addQ16(t, Q16fromInt(outStart));
-    return IntfromQ16(t);
-}
-
-int mapEaseOut(int in, int inStart, int inEnd, int outStart, int outEnd)
-{
-    int32_t t = Q16fromInt(in - inStart);
-    t = divQ16(t, Q16fromInt(inEnd - inStart));
-    t = easeOut(t);
-    t = constrainQ16(t, 0, Q16fromInt(1));
-    t = multQ16(Q16fromInt(outEnd - outStart), t);
-    t = addQ16(t, Q16fromInt(outStart));
-    return IntfromQ16(t);
-}
-
-int mapEaseInOut(int in, int inStart, int inEnd, int outStart, int outEnd)
-{
-    int32_t t = Q16fromInt(in - inStart);
-    t = divQ16(t, Q16fromInt(inEnd - inStart));
-    t = lerp(easeIn(t), easeOut(t), t);
-    t = constrainQ16(t, 0, Q16fromInt(1));
-    t = multQ16(Q16fromInt(outEnd - outStart), t);
-    t = addQ16(t, Q16fromInt(outStart));
-    return IntfromQ16(t);
-}
 #endif
 
 // Constructor for Axis Class
 TCodeAxis::TCodeAxis()
 {
-    easing = EasingType::LINEAR;
+    ramp = TCode_Axis_Ramp_Type::Linear;
     rampStartTime = 0;
     rampStart = TCODE_DEFAULT_AXIS_RETURN_VALUE;
     rampStopTime = rampStart;
@@ -177,21 +132,30 @@ TCodeAxis::TCodeAxis()
     minInterval = TCODE_MAX_AXIS_SMOOTH_INTERVAL;
 }
 
-void TCodeAxis::setEasingType(EasingType e)
+/**
+ * @brief Sets the ramp type for the axis
+ * @param e the TCode Axis Ramp Type to be set
+ */
+void TCodeAxis::setRampType(TCode_Axis_Ramp_Type e)
 {
-    easing = e;
+    ramp = e;
 }
 
-// Function to set the axis dynamic parameters
-void TCodeAxis::set(int x, char ext, long y)
+/**
+ * @brief sets the axis' dynamic parameters
+ * @param x the target value
+ * @param ext the extention type for the axis e.g. Time,Speed
+ * @param y the extention value
+ */
+void TCodeAxis::set(int x, TCode_Axis_Extention_Type ext, long y)
 {
     unsigned long t = millis(); // This is the time now
-    x = constrain(x, 0, 9999);
-    y = constrain(y, 0, 9999999);
+    x = constrain(x, 0, TCODE_MAX_AXIS);
+    y = constrain(y, 0, TCODE_MAX_AXIS_MAGNITUDE);
     // Set ramp parameters, based on inputs
     switch (ext)
     {
-    case 'S':
+    case TCode_Axis_Extention_Type::Speed:
     {
         rampStart = getPosition(); // Start from current position
         int d = x - rampStart;     // Distance to move
@@ -205,7 +169,7 @@ void TCodeAxis::set(int x, char ext, long y)
         rampStopTime = t + dt; // Time to arrive at new position
     }
     break;
-    case 'I':
+    case TCode_Axis_Extention_Type::Time:
     {
         rampStart = getPosition(); // Start from current position
         rampStopTime = t + y;      // Time to arrive at new position
@@ -233,7 +197,10 @@ void TCodeAxis::set(int x, char ext, long y)
     lastT = t;
 }
 
-// Function to return the current position of this axis
+/**
+ * @brief gets the current position of the axis
+ * @returns current position of this axis as an int
+ */
 int TCodeAxis::getPosition()
 {
     int x; // This is the current axis position, 0-9999
@@ -244,18 +211,18 @@ int TCodeAxis::getPosition()
     }
     else if (t > rampStartTime)
     {
-        switch (easing)
+        switch (ramp)
         {
-        case EasingType::LINEAR:
+        case TCode_Axis_Ramp_Type::Linear:
             x = map(t, rampStartTime, rampStopTime, rampStart, rampStop);
             break;
-        case EasingType::EASEIN:
+        case TCode_Axis_Ramp_Type::EaseIn:
             x = mapEaseIn(t, rampStartTime, rampStopTime, rampStart, rampStop);
             break;
-        case EasingType::EASEOUT:
+        case TCode_Axis_Ramp_Type::EaseOut:
             x = mapEaseOut(t, rampStartTime, rampStopTime, rampStart, rampStop);
             break;
-        case EasingType::EASEINOUT:
+        case TCode_Axis_Ramp_Type::EaseInOut:
             x = mapEaseInOut(t, rampStartTime, rampStopTime, rampStart, rampStop);
             break;
         default:
@@ -270,7 +237,9 @@ int TCodeAxis::getPosition()
     return x;
 }
 
-// Function to stop axis movement at current position
+/**
+ * @brief stops axis movement at its current position
+ */
 void TCodeAxis::stop()
 {
     unsigned long t = millis(); // This is the time now
@@ -280,6 +249,10 @@ void TCodeAxis::stop()
     rampStopTime = t;
 }
 
+/**
+ * @brief stops axis movement at its current position
+ * @returns returns true if the axis has changed position since last check
+ */
 bool TCodeAxis::changed()
 {
     if (lastPosition != getPosition())
@@ -288,6 +261,32 @@ bool TCodeAxis::changed()
         return true;
     }
     return false;
+}
+
+/**
+ * @brief sets the name of the Axis
+ */
+void TCodeAxis::setName(String value)
+{
+    axisName = value;
+}
+
+/**
+ * @brief gets the name of the axis
+ * @returns returns the string representation of the name stored
+ */
+String TCodeAxis::getName()
+{
+    return axisName;
+}
+
+/**
+ * @brief checks if an axis is registered if so then returns true
+ * @returns returns true if axisName is not empty
+ */
+bool TCodeAxis::isUsed()
+{
+    return (axisName != "");
 }
 
 #endif
